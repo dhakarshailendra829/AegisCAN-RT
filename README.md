@@ -1,121 +1,122 @@
-RT-BLE2CAN Protocol Gateway
-<div align="center">
-  RT-BLE2CAN Protocol Gateway
-</div>
-<div align="center">
-  High-Speed Deterministic Middleware for Automotive Telemetry ⚡🚘
-</div>
+# 🚗 RT-BLE2CAN Protocol Gateway  
+### ⚡ Ultra-Low Latency | 🔐 Secure | 🏎 Automotive Grade
 
-Problem: Latency Can Kill
-Steering-by-wire 20ms delay = Crash:
+![Static Badge](https://img.shields.io/badge/RT--Latency-~1ms-brightgreen)
+![Static Badge](https://img.shields.io/badge/Determinism-High-blue)
+![Static Badge](https://img.shields.io/badge/BLE-5.3-informational)
+![Static Badge](https://img.shields.io/badge/CAN--Bus-2.0B-orange)
+![Static Badge](https://img.shields.io/badge/Safety-Heartbeat❤️-critical)
 
-| Failure           | Normal Gateways | Our Gateway           |
-| ----------------- | --------------- | --------------------- |
-| Buffer Bloat      | ❌ High Jitter   | 🟢 Priority Queue     |
-| TCP Overhead      | ❌ Blocking      | 🟢 UDP Real-Time      |
-| Bad Data Silence  | ❌ No Alerts     | 🟢 Heartbeat Watchdog |
-| Multi-Copy Frames | ❌ Slow          | 🟢 Zero-Copy Struct   |
-| No Timing Clarity | ❌ Just arrival  | 🟢 µs Profiling       |
+---
 
-Engineering Innovations
-| Feature                | Result                   |
-| ---------------------- | ------------------------ |
-| Zero-Copy Byte Packing | ⚡ Microsecond Processing |
-| CAN Priority Sorting   | Steering First — Always  |
-| Watchdog Heartbeat 1Hz | ISO-26262 Safety         |
-| Timestamp Trace        | True Real-Time Insights  |
-| Light-Threading        | Zero Packet Loss         |
+## 🎯 Why This Project Exists (The Real Problem)
 
-🧠 Animated-Look Architecture
-⚡ Electric pulse pathways • Dark HUD glass • Priority routing indicated
+> Steering-by-Wire systems **cannot tolerate >20ms delay** —  
+> **Jitter = Crash Risk 🚨**
+
+| Control Failure | Traditional Gateways | Our Gateway |
+|--|--|--|
+| Buffer Bloat | ❌ High Jitter | 🟢 Priority Scheduling |
+| TCP Overhead | ❌ Slow Blocking | 🟢 UDP Real-Time |
+| No Fail Detection | ❌ Blind & Unsafe | 🟢 Watchdog 1Hz |
+| Multi-Copy Frames | ❌ Extra Delay | 🟢 Zero-Copy Struct |
+| No Timing Insight | ❌ Only Arrival Time | 🟢 Full µs Profiling |
+
+---
+
+## 🧠 Advanced Engineering Innovations
+
+| Feature | Technical Impact |
+|--|--|
+| Byte-aligned Zero-Copy | ⚡ Microsecond CAN frame packing |
+| Priority Queue | Steering ALWAYS first |
+| Heartbeat Monitoring | ISO-26262 fail-safe logic |
+| Timestamped Packets | True Real-Time Latency ⚙️ |
+| Thread-Optimized IO | No Packet Drop |
+
+---
+
+## 🎬 Flow Animation (Pipeline GIF)
+📌 Replace link after uploading GIF in `assets/flow.gif`  
+![BLE to CAN Animation](assets/flow.gif)
+
+---
+
+## 🧩 End-to-End System Architecture
+
+```mermaid
 flowchart LR
     BLE["📡 BLE Sensor\n(Steering + Timestamp)"]
-    UDP["🌐 UDP Layer\nPort 5005"]
-    GATE["🧠 RT Gateway\n(Zero-Copy + Priority)"]
-    CAN["🚌 Virtual CAN Bus\nSocketCAN"]
-    HMI["📊 Neon Dashboard\nLatency Visualizer"]
+    UDP["🌐 UDP Ingress\nPort 5005"]
+    GW["🧠 RT Gateway\n(Priority + Struct)"]
+    CAN["🚌 Virtual CAN Bus\nVCAN0"]
+    HMI["📊 Latency Dashboard\nReal-Time"]
 
-    BLE -. ⚡ Fast Pulses .-> UDP
-    UDP -. ⚡⚡ Critical Packets .-> GATE
-    GATE -. 🔵 Steering First .-> CAN
-    GATE -. 🟡 Telemetry Flow .-> CAN
-    GATE -. ❤️ Heartbeat Flash .-> CAN
-    CAN -. ⚡ Real-time .-> HMI
+    BLE -- Encrypted Data --> UDP
+    UDP -- Zero-Copy Push --> GW
+    GW -- ID 0x100 🔵 Steering --> CAN
+    GW -- ID 0x200 🟡 Telemetry --> CAN
+    GW -- ID 0x7FF ❤️ Heartbeat --> CAN
+    CAN -- µs-Latency Feed --> HMI
 
-    style BLE fill:#0ea5e9,stroke:#082f49,stroke-width:3px,color:#fff,rx:25,ry:25
-    style UDP fill:#0369a1,stroke:#0c4a6e,stroke-width:3px,color:#fff,rx:25,ry:25
-    style GATE fill:#581c87,stroke:#3b0764,stroke-width:3px,color:#fff,rx:25,ry:25
-    style CAN fill:#f59e0b,stroke:#b45309,stroke-width:3px,rx:25,ry:25
-    style HMI fill:#be123c,stroke:#881337,stroke-width:3px,color:#fff,rx:25,ry:25
-    
-🔁 Priority Control Logic & Safety
+    style BLE fill:#0ea5e9,stroke:#082f49,stroke-width:3px,color:#fff,rx:14
+    style UDP fill:#0369a1,stroke:#0c4a6e,stroke-width:3px,color:#fff,rx:14
+    style GW fill:#581c87,stroke:#3b0764,stroke-width:3px,color:#fff,rx:14
+    style CAN fill:#f59e0b,stroke:#b45309,stroke-width:3px,color:#fff,rx:14
+    style HMI fill:#be123c,stroke:#881337,stroke-width:3px,color:#fff,rx:14
+```
+## ⏱️ Priority Control & Safety Logic
 sequenceDiagram
     participant BLE as BLE Source
     participant UDP as UDP Socket
-    participant GW as Gateway (Sorter)
-    participant CAN as CAN Bus
+    participant GW as Gateway Sorter
+    participant CAN as vCAN
     participant UI as Dashboard
 
-    BLE-->>UDP: Steering + TimeStamp
-    UDP-->>GW: Push to PriorityQueue
-    GW->>GW: Struct ZeroCopy Pack
+    BLE-->>UDP: Steering + Timestamp
+    UDP-->>GW: Insert → Priority Queue
+    GW->>GW: Zero-Copy Struct Pack
+
     par Critical Steering
-        GW-->>CAN: ID 0x100 (Blue Pulse ⚡)
+        GW-->>CAN: 0x100 (Blue Pulse)
     and Telemetry
-        GW-->>CAN: ID 0x200 (Yellow Flow)
-    and Safety
-        GW-->>CAN: ID 0x7FF (Heartbeat ❤️)
+        GW-->>CAN: 0x200 (Yellow Flow)
+    and Safety Watchdog
+        GW-->>CAN: 0x7FF (❤️ Heartbeat)
     end
-    CAN-->>UI: Real-Time Display + Latency
-    
-📊 Benchmarks (Verified)
-| Metric                   |    Value   |      Status      |
-| ------------------------ | :--------: | :--------------: |
-| BLE→CAN Latency          | **6–8 µs** | 🟢 Best-in-Class |
-| Jitter Variance          |    ±2 µs   | 🟢 Deterministic |
-| CPU Overhead             |   < 2.5%   |   🟢 Efficient   |
-| Heartbeat Fail Detection |  2 seconds |      🟢 Safe     |
 
-🛠️ Tech Stack
-| Layer          | Technology     | Reason               |
-| -------------- | -------------- | -------------------- |
-| Wireless Input | BLE Sim        | Real sensor behavior |
-| Transport      | UDP            | No blocking          |
-| Bus Output     | Virtual CAN    | ECU-Simulation       |
-| Scheduling     | Python Threads | IO optimized         |
-| Encoding       | `struct`       | Zero-copy            |
-
-🚀 Run System
-git clone https://github.com/dhakarshailendra829/RT-BLE2CAN-Protocol-Gateway.git
+    CAN-->>UI: Real-Time Status + µs Latency
+## ⚙️ Setup & Run (3 Nodes)
+---
+git clone https://github.com/dhakarshailendra829/RT-BLE2CAN-Protocol-Gateway
 cd RT-BLE2CAN-Protocol-Gateway
-pip install python-can
+pip install -r requirements.txt
 
+sudo modprobe vcan
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
 
-# 1️⃣ Gateway Node
-python src/can_translator.py
-# 2️⃣ Dashboard (HMI)
-python src/dashboard_gui.py
-# 3️⃣ BLE Packet Source
-python src/ble_receiver.py
+# 1️⃣ Run Gateway
+python3 src/master_gateway.py
+# 2️⃣ Visual Dashboard
+python3 src/dashboard.py
+# 3️⃣ BLE → UDP Source
+python3 src/ble_client.py
+---
+## 🔐 Security Layers
+| Layer           | Protection             |
+| --------------- | ---------------------- |
+| BLE Transport   | AES-128 CCM            |
+| UDP Stream      | AES-256 Encrypted      |
+| Memory Handling | Zero-Copy Safe Buffers |
 
-🔐 CAN ID Priorities
-| ID    |      Data |   Priority   |
-| ----- | --------: | :----------: |
-| 0x100 |  Steering | ⭐ Ultra-High |
-| 0x200 | Telemetry |    Medium    |
-| 0x7FF | Heartbeat |   ❤️ Safety  |
+##🚀 Real-World Applications
+EV Steering Research & ADAS
+Automotive Gateway Simulators
+Robotic/Industrial CAN Control
+V2X Low-Latency Telemetry
 
-
-
-🛡️ Fail-Safe Design
-
-If 2s no 0x7FF → Auto-Emergency Mode enabled 🚨
-
-👨‍💻 Author
-
-Shailendra Dhakar
-Embedded Automotive Protocol Engineer
-
-📎 GitHub • LinkedIn
-
-🚀 Contributions Welcome
+##Author
+Shailendra Dhakad
+Embedded Systems | CAN | BLE | Real-Time Systems
+📌 GitHub • LinkedIn • Portfolio
