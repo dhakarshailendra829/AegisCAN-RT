@@ -1,0 +1,4 @@
+python-can==4.3.1
+bleak==0.21.1
+asyncio
+tkinter
