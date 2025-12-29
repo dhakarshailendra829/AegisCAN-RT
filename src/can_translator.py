@@ -1,4 +1,3 @@
-# src/can_translator.py - 🏎️ Real-Time CAN Gateway | Timestamp-Safe | HMI-Optimized
 import can
 import time
 import socket
@@ -23,10 +22,8 @@ class CANTranslator:
         return int((raw - 127) * (900 / 255))
 
     def build_can_message(self, steering_angle, priority, ts_us):
-        # 8B Payload Layout
-        # [0:1 Steering LSB][1:2 Steering MSB][2 Priority][3:8 Timestamp-5B]
         ts_bytes = struct.pack('<Q', ts_us)[:5]
-        angle_bytes = struct.pack('<h', steering_angle)  # 2B signed
+        angle_bytes = struct.pack('<h', steering_angle)  
         return bytearray(angle_bytes + bytes([priority]) + ts_bytes)
 
     def process_packet(self, item):
@@ -42,16 +39,15 @@ class CANTranslator:
             self.bus.send(msg, timeout=0.002)
             latency_us = int((time.perf_counter() - t0) * 1_000_000)
 
-            # log real telemetry
             with open(self.log_file, "a", newline="", buffering=1) as f:
                 csv.writer(f).writerow([
                     time.time(), steering_angle, latency_us, priority, self.priority_queue.qsize()
                 ])
 
-            print(f"\r🚗 Steering: {steering_angle:4}° ⏱ {latency_us:3}μs", end="")
+            print(f"\r Steering: {steering_angle:4}° {latency_us:3}μs", end="")
 
         except can.CanError:
-            print("\n⚠ CAN BUS FAIL: retry later")
+            print("\n CAN BUS FAIL: retry later")
 
     def can_forward_thread(self):
         while self.running:
@@ -66,7 +62,7 @@ class CANTranslator:
         while self.running:
             try:
                 data, _ = self.sock.recvfrom(64)
-                if len(data) >= 10:  # 1B priority + 8B timestamp
+                if len(data) >= 10:  
                     priority = data[0]
                     ts_us = struct.unpack('<Q', data[1:9])[0]
                     payload = data[9:]
@@ -74,7 +70,7 @@ class CANTranslator:
                     try:
                         self.priority_queue.put_nowait((priority, ts_us, payload))
                     except Full:
-                        print("⚠ Queue Overflow: dropping sample")
+                        print(" Queue Overflow: dropping sample")
             except:
                 pass
 
@@ -91,28 +87,24 @@ class CANTranslator:
         time.sleep(0.1)
         if self.sock:
             self.sock.close()
-        print("\n🔚 CAN Gateway Down")
+        print("\n CAN Gateway Down")
 
 def main():
-    print("🚀 CAN Translator Starting...")
+    print(" CAN Translator Starting...")
     tr = CANTranslator()
-
-    # Initialize CAN bus
     tr.bus = can.interface.Bus(interface='virtual', channel='vcan0')
-    print("🟢 CAN Bus Linked (vcan0)")
+    print(" CAN Bus Linked (vcan0)")
 
-    # UDP binding
     tr.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     tr.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     tr.sock.bind(("127.0.0.1", 5005))
-    print("🟢 UDP Receiver Ready @ 5005")
+    print(" UDP Receiver Ready @ 5005")
 
-    # Threads
     threading.Thread(target=tr.udp_receiver_thread, daemon=True).start()
     threading.Thread(target=tr.can_forward_thread, daemon=True).start()
     threading.Thread(target=tr.send_heartbeat_thread, daemon=True).start()
 
-    print("🎯 BLE → UDP → CAN Pipeline Active\n")
+    print(" BLE → UDP → CAN Pipeline Active\n")
 
     try:
         while True:

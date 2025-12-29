@@ -1,4 +1,3 @@
-# src/master_gateway.py - 🏭 ENTERPRISE CONTROL CENTER v2.0
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 import threading
@@ -19,7 +18,7 @@ SERVICES = {
 class EnterpriseGatewayUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("🚗 BLE-CAN Production Gateway")
+        self.root.title("BLE-CAN Production Gateway")
         self.root.geometry("1100x800")
         self.root.configure(bg="#0d1117")
 
@@ -33,11 +32,10 @@ class EnterpriseGatewayUI:
         threading.Thread(target=self.system_monitor_loop, daemon=True).start()
         threading.Thread(target=self.heartbeat_loop, daemon=True).start()
 
-    # ---------------- UI BUILD ---------------- #
     def setup_enterprise_ui(self):
         title_frame = tk.Frame(self.root, bg="#161b22", height=90)
         title_frame.pack(fill="x")
-        lbl_title = tk.Label(title_frame, text="🚗 AUTOMOTIVE GATEWAY CONTROL",
+        lbl_title = tk.Label(title_frame, text="AUTOMOTIVE GATEWAY CONTROL",
                              font=("Segoe UI", 22, "bold"),
                              fg="#58a6ff", bg="#161b22")
         lbl_title.pack(side="left", padx=30, pady=20)
@@ -52,19 +50,19 @@ class EnterpriseGatewayUI:
         control_frame = tk.Frame(self.root, bg="#0d1117")
         control_frame.pack(fill="x", padx=30, pady=20)
 
-        tk.Button(control_frame, text="🚀 LAUNCH PRODUCTION",
+        tk.Button(control_frame, text="LAUNCH PRODUCTION",
                   command=self.start_production,
                   bg="#238636", fg="white",
                   font=("Segoe UI", 12, "bold"),
                   width=22, height=2).grid(row=0, column=0, padx=10)
 
-        tk.Button(control_frame, text="🧪 VALIDATION SUITE",
+        tk.Button(control_frame, text="VALIDATION SUITE",
                   command=self.run_tests,
                   bg="#9e6a03", fg="white",
                   font=("Segoe UI", 12, "bold"),
                   width=20, height=2).grid(row=0, column=1, padx=10)
 
-        tk.Button(control_frame, text="🛑 SYSTEM STOP",
+        tk.Button(control_frame, text="SYSTEM STOP",
                   command=self.stop_all,
                   bg="#da3633", fg="white",
                   font=("Segoe UI", 12, "bold"),
@@ -97,7 +95,6 @@ class EnterpriseGatewayUI:
         )
         self.log_text.pack(fill="both", expand=True)
 
-    # ---------------- LOGGING ---------------- #
     def log(self, message):
         self.log_queue.put(f"[{time.strftime('%H:%M:%S')}] {message}\n")
 
@@ -110,12 +107,11 @@ class EnterpriseGatewayUI:
             except:
                 pass
 
-    # ---------------- START SERVICES ---------------- #
     def start_production(self):
         if self.start_time: return
         self.start_time = time.time()
         self.status_led.itemconfig(self.led_circle, fill="#3fb950")
-        self.log("🎯 Production Gateway Online")
+        self.log("Production Gateway Online")
 
         for name, cmd in SERVICES.items():
             self.start_service(name, cmd)
@@ -131,12 +127,11 @@ class EnterpriseGatewayUI:
                 text=True, creationflags=creation_flag
             )
             self.processes[name] = proc
-            self.log(f"🟢 {name} launched (PID={proc.pid})")
+            self.log(f" {name} launched (PID={proc.pid})")
 
         except Exception as e:
-            self.log(f"❌ {name} failed: {e}")
+            self.log(f" {name} failed: {e}")
 
-    # ---------------- MONITORING ---------------- #
     def system_monitor_loop(self):
         while True:
             if not self.start_time: 
@@ -155,21 +150,19 @@ class EnterpriseGatewayUI:
     def heartbeat_loop(self):
         while True:
             for name, proc in list(self.processes.items()):
-                if proc.poll() is not None:  # crashed
+                if proc.poll() is not None:  
                     self.log(f"🔁 RESTARTING {name} (Crash Detected)")
                     self.start_service(name, SERVICES[name])
             time.sleep(2)
 
-    # ---------------- TEST RUN ---------------- #
     def run_tests(self):
-        self.log("🧪 Running Validation Suite...")
+        self.log(" Running Validation Suite...")
         threading.Thread(target=lambda:
             subprocess.run(["python", "tests/test_latency.py"]), daemon=True
         ).start()
 
-    # ---------------- SAFE SHUTDOWN ---------------- #
     def stop_all(self):
-        self.log("🔻 Power Down - Complete Shutdown")
+        self.log(" Power Down - Complete Shutdown")
         self.status_led.itemconfig(self.led_circle, fill="#f85149")
 
         for name, proc in self.processes.items():
@@ -178,7 +171,7 @@ class EnterpriseGatewayUI:
                 for child in p.children(recursive=True):
                     child.terminate()
                 p.terminate()
-                self.log(f"🔴 {name} Stopped")
+                self.log(f" {name} Stopped")
             except: pass
         self.processes.clear()
         self.start_time = None

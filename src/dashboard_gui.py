@@ -1,4 +1,3 @@
-# src/dashboard_gui.py - 🏎️ HMI v2 | Smooth Needle | Accurate CAN Decoding
 import tkinter as tk
 from tkinter import ttk
 import threading
@@ -18,17 +17,16 @@ class AutomotiveHMI:
 
         self.last_heartbeat = 0
         self.gui_queue = Queue()
-        self.current_angle = 0  # filtered steering
+        self.current_angle = 0  
 
         self.setup_modern_styles()
         self.create_widgets()
 
-        # MUST MATCH can_translator Bus Name
         try:
             self.bus = can.interface.Bus(interface='virtual', channel='vcan0')
-            print("🟢 HMI linked to vcan0")
+            print("HMI linked to vcan0")
         except Exception as e:
-            print(f"❌ HMI Bus Error: {e}")
+            print(f" HMI Bus Error: {e}")
             return
 
         self.start_threads()
@@ -49,7 +47,6 @@ class AutomotiveHMI:
                                      font=("Segoe UI", 14, "bold"), bg="#1a1a1a")
         self.status_label.pack(side="right", padx=20)
 
-        # Steering gauge
         self.canvas = tk.Canvas(self.root, width=400, height=300,
                                 bg="#121212", highlightthickness=0)
         self.canvas.pack(pady=20)
@@ -67,7 +64,6 @@ class AutomotiveHMI:
         self.needle = self.canvas.create_line(200, 200, 200, 100,
                                              fill="#ff9800", width=5)
 
-        # Telemetry
         tel_frame = tk.Frame(self.root, bg="#1a1a1a", height=140)
         tel_frame.pack(fill="x", side="bottom")
 
@@ -81,9 +77,8 @@ class AutomotiveHMI:
                                     bg="#1a1a1a")
         self.queue_label.pack(pady=4)
 
-    # Smooth animation filter
     def update_needle(self, steering_angle):
-        alpha = 0.25  # smoothing factor
+        alpha = 0.25  
         self.current_angle = (alpha * steering_angle +
                               (1 - alpha) * self.current_angle)
 
@@ -105,8 +100,8 @@ class AutomotiveHMI:
                 key, value = self.gui_queue.get(timeout=0.01)
                 if key == "STATUS": self.status_label.config(text=value[0], fg=value[1])
                 elif key == "ANGLE": self.update_needle(value)
-                elif key == "LAT": self.latency_label.config(text=f"⚡ Latency: {value} μs")
-                elif key == "Q": self.queue_label.config(text=f"📊 Queue: {value} Frames")
+                elif key == "LAT": self.latency_label.config(text=f"Latency: {value} μs")
+                elif key == "Q": self.queue_label.config(text=f"Queue: {value} Frames")
             except Empty:
                 pass
 
@@ -117,16 +112,14 @@ class AutomotiveHMI:
 
             if msg.arbitration_id == 0x7FF:
                 self.last_heartbeat = time.time()
-                q_depth = msg.data[2]  # fixed index
+                q_depth = msg.data[2]  
                 self.gui_queue.put(("STATUS", ("● ACTIVE", "#00ff88")))
                 self.gui_queue.put(("Q", q_depth))
 
             elif msg.arbitration_id == 0x100:
-                # Parse signed steering
                 steering_angle = struct.unpack('<h', msg.data[0:2])[0]
                 self.gui_queue.put(("ANGLE", steering_angle))
 
-                # Latency omitted: not present in CAN frame anymore
                 self.gui_queue.put(("LAT", "--"))
 
     def heartbeat_watchdog(self):
