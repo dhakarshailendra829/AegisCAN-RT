@@ -1,5 +1,9 @@
-# RT-BLE2CAN Protocol Gateway  
-### Ultra-Low Latency • Fail-Safe • Automotive-Grade
+<p align="center">
+  <b>AegisCAN‑RT</b><br/>
+  <b>Real‑Time BLE → CAN Automotive Gateway</b><br/>
+</p>
+
+<p align="center">
 
 ![Static Badge](https://img.shields.io/badge/RT--Latency-~1ms-brightgreen)
 ![Static Badge](https://img.shields.io/badge/Determinism-High-blue)
@@ -7,57 +11,72 @@
 ![Static Badge](https://img.shields.io/badge/CAN--Bus-2.0B-orange)
 ![Static Badge](https://img.shields.io/badge/ISO--26262-Safety%20Ready-red)
 
----
-Projct 
-## Why This Project Exists  
-> In Steer-by-Wire, **20ms delay = Loss of control = Crash **
-
-| Issue | Standard Gateways | This System |
-|------|-------------------|----------------|
-| Latency | High Jitter | Strict deterministic |
-| Protocol Overhead | TCP Blocking | UDP Real-Time |
-| Packet Monitoring | None | Heartbeat Watchdog |
-| Frame Handling | Multiple Copies | Zero-Copy Struct |
-| Telemetry Accuracy | No Timing | µs Timestamped |
+</p>
 
 ---
 
-## Gateway Engineering Highlights
+## 📌 Problem Statement
 
-| Feature | Benefit |
-|--|--|
-| Zero-Copy Byte Packing | µs CAN publishing |
-| Priority Queue | Steering always first |
-| 1Hz Heartbeat Watchdog | Safety failover |
-| Thread-Optimized IO | Zero packet drop |
-| Latency Analytics | Diagnostic insights |
+Modern automotive and robotic control systems such as **Steer‑by‑Wire, Brake‑by‑Wire, ADAS, and V2X telemetry** demand *strictly deterministic* communication between wireless sensors and in‑vehicle CAN networks. Traditional IoT gateways are designed for throughput rather than determinism, leading to **unpredictable latency, jitter, packet drops, and unsafe control delays**.
+
+In safety‑critical systems, even a **20 ms delay can translate into loss of steering authority, unstable vehicle behavior, or complete system failure**. Existing BLE‑to‑CAN bridges typically rely on TCP‑based stacks, multiple memory copies, and non‑prioritized message handling, making them unsuitable for real‑time automotive control.
+
+This project addresses the gap by engineering a **real‑time, fail‑safe BLE → CAN 2.0B gateway** that guarantees low‑latency message delivery, deterministic scheduling, and safety‑aligned fault detection — suitable for **automotive research, embedded simulation, and industrial control environments**.
 
 ---
 
-## System Architecture  
+## 🎯 Why This Project Exists
+
+> **In Steer‑by‑Wire systems, latency is not a performance metric — it is a safety constraint.**
+
+The goal is to build a gateway that behaves like an **automotive ECU**, not a generic IoT relay.
+
+| Issue             | Standard Gateways | AegisCAN‑RT              |
+| ----------------- | ----------------- | ------------------------ |
+| Latency           | High jitter       | Deterministic (~1 ms)    |
+| Protocol          | TCP blocking      | UDP real‑time            |
+| Message Priority  | Best‑effort       | Safety‑aware scheduling  |
+| Memory Copies     | Multiple          | Zero‑copy struct packing |
+| Fault Detection   | None              | Heartbeat watchdog       |
+| Timing Visibility | Absent            | µs‑level timestamping    |
+
+---
+
+## ⚙️ Gateway Engineering Highlights
+
+| Feature                   | Engineering Impact                       |
+| ------------------------- | ---------------------------------------- |
+| Zero‑Copy Byte Packing    | Eliminates serialization overhead        |
+| Priority‑Driven Scheduler | Steering frames always preempt telemetry |
+| Heartbeat Watchdog (1 Hz) | Immediate fault and link‑loss detection  |
+| Thread‑Optimized I/O      | Zero packet drop under load              |
+| Latency Analytics         | End‑to‑end diagnostic visibility         |
+
+---
+
+## 🧠 System Architecture
 
 ```mermaid
 flowchart LR
     BLE[" BLE Sensor\n(Steering + Timestamp)"]
     UDP[" UDP Ingress\nPort 5005"]
-    GW[" Real-Time Gateway\n(Priority + Struct)"]
+    GW[" Real‑Time Gateway\n(Priority + Zero‑Copy)"]
     CAN[" Virtual CAN Bus\nVCAN0"]
-    HMI[" Latency Dashboard\nReal-Time UI"]
+    HMI[" Latency Dashboard\nReal‑Time UI"]
 
-    BLE -- Encrypted Data --> UDP
-    UDP -- Zero-Copy Push --> GW
+    BLE -- Encrypted Frames --> UDP
+    UDP -- Zero‑Copy Push --> GW
     GW -- ID 0x100  Steering --> CAN
     GW -- ID 0x200  Telemetry --> CAN
     GW -- ID 0x7FF  Heartbeat --> CAN
     CAN -- µs Timing --> HMI
-
-    style BLE fill:#0ea5e9,stroke:#082f49,stroke-width:3px,color:#fff,rx:14
-    style UDP fill:#0369a1,stroke:#0c4a6e,stroke-width:3px,color:#fff,rx:14
-    style GW fill:#581c87,stroke:#3b0764,stroke-width:3px,color:#fff,rx:14
-    style CAN fill:#f59e0b,stroke:#b45309,stroke-width:3px,color:#fff,rx:14
-    style HMI fill:#be123c,stroke:#881337,stroke-width:3px,color:#fff,rx:14
 ```
-## Priority Control & Safety Logic
+
+---
+
+## 🔐 Priority Control & Safety Logic
+
+```mermaid
 sequenceDiagram
     participant BLE as BLE Source
     participant UDP as UDP Socket
@@ -67,29 +86,35 @@ sequenceDiagram
 
     BLE-->>UDP: Steering + Timestamp
     UDP-->>GW: Insert → Priority Queue
-    GW->>GW: Zero-Copy Struct Pack
+    GW->>GW: Zero‑Copy Struct Pack
 
     par Critical Steering
-        GW-->>CAN: 0x100 (Blue Pulse)
+        GW-->>CAN: 0x100 (Steering)
     and Telemetry
-        GW-->>CAN: 0x200 (Yellow Flow)
+        GW-->>CAN: 0x200 (Telemetry)
     and Safety Watchdog
-        GW-->>CAN: 0x7FF ( Heartbeat)
+        GW-->>CAN: 0x7FF (Heartbeat)
     end
 
-    CAN-->>UI: Real-Time Status + µs Latency
+    CAN-->>UI: Real‑Time Status + µs Latency
+```
 
-## Setup & Run (3 Nodes)
+---
+
+## 🛠️ Setup & Run (3‑Node Simulation)
+
 ```bash
-git clone https://github.com/dhakarshailendra829/RT-BLE2CAN-Protocol-Gateway
-cd RT-BLE2CAN-Protocol-Gateway
+git clone https://github.com/dhakarshailendra829/RealTime-IoT-Gateway-BLE-to-CAN
+cd RealTime-IoT-Gateway-BLE-to-CAN
 pip install -r requirements.txt
 ```
+
 ```bash
 sudo modprobe vcan
 sudo ip link add dev vcan0 type vcan
 sudo ip link set up vcan0
 ```
+
 ```bash
 # 1️⃣ Run Gateway
 python3 src/master_gateway.py
@@ -98,23 +123,32 @@ python3 src/dashboard.py
 # 3️⃣ BLE → UDP Source
 python3 src/ble_client.py
 ```
-## Security Layers
-```
+
+---
+
+## 🛡️ Security Layers
+
 | Layer           | Protection             |
 | --------------- | ---------------------- |
-| BLE Transport   | AES-128 CCM            |
-| UDP Stream      | AES-256 Encrypted      |
-| Memory Handling | Zero-Copy Safe Buffers |
-```
-## Real-World Applications
-* EV Steering Research & ADAS
-* Automotive Gateway Simulators
-* Robotic / Industrial CAN Control
-* V2X Low-Latency Telemetry
+| BLE Transport   | AES‑128 CCM            |
+| UDP Stream      | AES‑256 Encryption     |
+| Memory Handling | Zero‑Copy Safe Buffers |
+
 ---
+
+## 🚗 Real‑World Applications
+
+• Steer‑by‑Wire & ADAS research platforms
+• Automotive gateway & ECU simulators
+• Robotic and industrial CAN control
+• V2X low‑latency telemetry pipelines
+
+---
+
 ## 👤 Author
-Shailendra Dhakad
-Embedded Systems • CAN • BLE • Real-Time Systems
-• GitHub: https://github.com/dhakarshailendra829
-• LinkedIn: https://www.linkedin.com/in/shailendra-dhakad-063a98292/
----
+
+**Shailendra Dhakad**
+Embedded Systems • CAN • BLE • Real‑Time Systems
+GitHub: [https://github.com/dhakarshailendra829](https://github.com/dhakarshailendra829)
+LinkedIn: [https://www.linkedin.com/in/shailendra-dhakad-063a98292/](https://www.linkedin.com/in/shailendra-dhakad-063a98292/)
+
