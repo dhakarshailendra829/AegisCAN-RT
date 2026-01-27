@@ -1,21 +1,21 @@
 <p align="center">
-  <b>AegisCAN‑RT</b><br/>
-  <b>Real‑Time BLE → CAN Automotive Gateway</b><br/>
+  <h1 align="center">AegisCAN-RT</h1>
+  <h3 align="center">Real-Time BLE → CAN Automotive Gateway</h3>
 </p>
 
 <p align="center">
 
-![Static Badge](https://img.shields.io/badge/RT--Latency-~1ms-brightgreen)
-![Static Badge](https://img.shields.io/badge/Determinism-High-blue)
-![Static Badge](https://img.shields.io/badge/BLE-5.3-informational)
-![Static Badge](https://img.shields.io/badge/CAN--Bus-2.0B-orange)
-![Static Badge](https://img.shields.io/badge/ISO--26262-Safety%20Ready-red)
+  <img src="https://img.shields.io/badge/RT--Latency-~1ms-brightgreen" />
+  <img src="https://img.shields.io/badge/Determinism-High-blue" />
+  <img src="https://img.shields.io/badge/BLE-5.3-informational" />
+  <img src="https://img.shields.io/badge/CAN--Bus-2.0B-orange" />
+  <img src="https://img.shields.io/badge/ISO--26262-Safety%20Ready-red" />
 
 </p>
 
 ---
 
-## 📌 Problem Statement
+## Problem Statement
 
 Modern automotive and robotic control systems such as **Steer‑by‑Wire, Brake‑by‑Wire, ADAS, and V2X telemetry** demand *strictly deterministic* communication between wireless sensors and in‑vehicle CAN networks. Traditional IoT gateways are designed for throughput rather than determinism, leading to **unpredictable latency, jitter, packet drops, and unsafe control delays**.
 
@@ -25,7 +25,7 @@ This project addresses the gap by engineering a **real‑time, fail‑safe BLE �
 
 ---
 
-## 🎯 Why This Project Exists
+## Why This Project Exists
 
 > **In Steer‑by‑Wire systems, latency is not a performance metric — it is a safety constraint.**
 
@@ -42,7 +42,7 @@ The goal is to build a gateway that behaves like an **automotive ECU**, not a ge
 
 ---
 
-## ⚙️ Gateway Engineering Highlights
+## Gateway Engineering Highlights
 
 | Feature                   | Engineering Impact                       |
 | ------------------------- | ---------------------------------------- |
@@ -54,7 +54,7 @@ The goal is to build a gateway that behaves like an **automotive ECU**, not a ge
 
 ---
 
-## 🧠 System Architecture
+## System Architecture
 
 ```mermaid
 flowchart LR
@@ -74,7 +74,7 @@ flowchart LR
 
 ---
 
-## 🔐 Priority Control & Safety Logic
+## Priority Control & Safety Logic
 
 ```mermaid
 sequenceDiagram
@@ -101,7 +101,7 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Setup & Run (3‑Node Simulation)
+## Setup & Run (3‑Node Simulation)
 
 ```bash
 git clone https://github.com/dhakarshailendra829/RealTime-IoT-Gateway-BLE-to-CAN
@@ -116,17 +116,17 @@ sudo ip link set up vcan0
 ```
 
 ```bash
-# 1️⃣ Run Gateway
+# 1️. Run Gateway
 python3 src/master_gateway.py
-# 2️⃣ Visual Dashboard
+# 2️. Visual Dashboard
 python3 src/dashboard.py
-# 3️⃣ BLE → UDP Source
+# 3️. BLE → UDP Source
 python3 src/ble_client.py
 ```
 
 ---
 
-## 🛡️ Security Layers
+## Security Layers
 
 | Layer           | Protection             |
 | --------------- | ---------------------- |
@@ -136,7 +136,7 @@ python3 src/ble_client.py
 
 ---
 
-## 🚗 Real‑World Applications
+## Real‑World Applications
 
 • Steer‑by‑Wire & ADAS research platforms
 • Automotive gateway & ECU simulators
@@ -147,8 +147,9 @@ python3 src/ble_client.py
 
 ## 👤 Author
 
-**Shailendra Dhakad**
-Embedded Systems • CAN • BLE • Real‑Time Systems
-GitHub: [https://github.com/dhakarshailendra829](https://github.com/dhakarshailendra829)
-LinkedIn: [https://www.linkedin.com/in/shailendra-dhakad-063a98292/](https://www.linkedin.com/in/shailendra-dhakad-063a98292/)
+**Shailendra Dhakad**  
 
+Embedded Systems • CAN • BLE • Real-Time Systems  
+
+GitHub: https://github.com/dhakarshailendra829  
+LinkedIn: https://www.linkedin.com/in/shailendra-dhakad-063a98292/
