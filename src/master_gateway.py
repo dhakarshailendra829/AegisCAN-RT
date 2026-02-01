@@ -69,17 +69,17 @@ class EnterpriseGatewayUI:
         metrics.pack(fill="x", padx=30)
 
         self.lat_tile = tk.Label(metrics, text="LATENCY: -- ms",
-                                 bg="#161b22", fg="#ffa657",
+                                 bg="#161b22", fg="#c86611",
                                  font=("Consolas", 14, "bold"), width=22, pady=15)
         self.lat_tile.pack(side="left", padx=10)
 
         self.up_tile = tk.Label(metrics, text="UPTIME: 00:00",
-                                bg="#161b22", fg="#79c0ff",
+                                bg="#161b22", fg="#3387d0",
                                 font=("Consolas", 14, "bold"), width=22, pady=15)
         self.up_tile.pack(side="left", padx=10)
 
         self.sys_tile = tk.Label(metrics, text="CPU: --% | RAM: --%",
-                                 bg="#161b22", fg="#3fb950",
+                                 bg="#161b22", fg="#0a9c1d",
                                  font=("Consolas", 14, "bold"), width=26, pady=15)
         self.sys_tile.pack(side="right", padx=10)
 
@@ -92,7 +92,7 @@ class EnterpriseGatewayUI:
         log_container = tk.Frame(self.root, bg="#161b22", bd=1)
         log_container.pack(fill="both", expand=True, padx=40, pady=10)
         self.log_text = scrolledtext.ScrolledText(
-            log_container, bg="#0d1117", fg="#c9d1d9",
+            log_container, bg="#0d1117", fg="#095096",
             font=("Consolas", 11), borderwidth=0
         )
         self.log_text.pack(fill="both", expand=True)
