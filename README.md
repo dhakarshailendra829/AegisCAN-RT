@@ -101,29 +101,40 @@ sequenceDiagram
 
 ---
 
-## Setup & Run (3‑Node Simulation)
+## Setup & Run 
 
 ```bash
-git clone https://github.com/dhakarshailendra829/RealTime-IoT-Gateway-BLE-to-CAN
-cd RealTime-IoT-Gateway-BLE-to-CAN
+git clone https://github.com/dhakarshailendra829/AegisCAN-RT.git
+cd AegisCAN-RT
 pip install -r requirements.txt
 ```
 
 ```bash
-sudo modprobe vcan
-sudo ip link add dev vcan0 type vcan
-sudo ip link set up vcan0
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Linux / Mac
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ```bash
-# 1️. Run Gateway
-python3 src/master_gateway.py
-# 2️. Visual Dashboard
-python3 src/dashboard.py
-# 3️. BLE → UDP Source
-python3 src/ble_client.py
+# Windows or Linux
+python src/can_translator.py
+# Windows
+python src\master_gateway.py
+# Linux / Mac
+python src/master_gateway.py
 ```
 
+```bash
+## Optional: Run GUI only
+# Windows
+python src\dashboard_gui.py
+# Linux / Mac
+python src/dashboard_gui.py
+
+```
 ---
 
 ## Security Layers
