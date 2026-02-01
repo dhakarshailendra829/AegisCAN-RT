@@ -6,7 +6,6 @@ import time
 import queue
 import os
 import psutil
-import signal
 import platform
 
 SERVICES = {
@@ -33,6 +32,7 @@ class EnterpriseGatewayUI:
         threading.Thread(target=self.heartbeat_loop, daemon=True).start()
 
     def setup_enterprise_ui(self):
+        # Title Frame
         title_frame = tk.Frame(self.root, bg="#161b22", height=90)
         title_frame.pack(fill="x")
         lbl_title = tk.Label(title_frame, text="AUTOMOTIVE GATEWAY CONTROL",
@@ -43,10 +43,9 @@ class EnterpriseGatewayUI:
         self.status_led = tk.Canvas(title_frame, width=26, height=26,
                                     bg="#161b22", highlightthickness=0)
         self.status_led.pack(side="right", padx=20)
-        self.led_circle = self.status_led.create_oval(
-            5, 5, 21, 21, fill="#f85149"
-        )
+        self.led_circle = self.status_led.create_oval(5, 5, 21, 21, fill="#f85149")
 
+        # Control Frame
         control_frame = tk.Frame(self.root, bg="#0d1117")
         control_frame.pack(fill="x", padx=30, pady=20)
 
@@ -87,6 +86,14 @@ class EnterpriseGatewayUI:
                                  font=("Consolas", 14, "bold"), width=26, pady=15)
         self.sys_tile.pack(side="right", padx=10)
 
+        # ✅ Simulation Mode Label
+        self.sim_mode_label = tk.Label(metrics, text="", bg="#0d1117", fg="#ffa657",
+                                       font=("Consolas", 12, "bold"), width=30)
+        self.sim_mode_label.pack(side="right", padx=10)
+        if platform.system() == "Windows":
+            self.sim_mode_label.config(text="Simulation Mode (Windows)")
+
+        # Log Container
         log_container = tk.Frame(self.root, bg="#161b22", bd=1)
         log_container.pack(fill="both", expand=True, padx=40, pady=10)
         self.log_text = scrolledtext.ScrolledText(
@@ -95,6 +102,7 @@ class EnterpriseGatewayUI:
         )
         self.log_text.pack(fill="both", expand=True)
 
+    # Logging
     def log(self, message):
         self.log_queue.put(f"[{time.strftime('%H:%M:%S')}] {message}\n")
 
@@ -107,6 +115,7 @@ class EnterpriseGatewayUI:
             except:
                 pass
 
+    # Start Production
     def start_production(self):
         if self.start_time: return
         self.start_time = time.time()
@@ -117,36 +126,44 @@ class EnterpriseGatewayUI:
             self.start_service(name, cmd)
             time.sleep(0.4)
 
+        # Windows-safe: skip latency benchmark if running on Windows
+        if platform.system() == "Windows":
+            self.log("⚠️ Windows detected: Skipping latency benchmark in simulation mode")
+        else:
+            # Linux / real CAN: run latency benchmark if available
+            try:
+                import master_gateway  # Ensure this exists
+                master_gateway.run_latency_benchmark()
+            except Exception as e:
+                self.log(f"Latency benchmark skipped / failed: {e}")
+
+    # Start individual service
     def start_service(self, name, cmd):
         try:
-            creation_flag = (subprocess.CREATE_NEW_CONSOLE
-                             if platform.system() == "Windows" else 0)
-
+            creation_flag = subprocess.CREATE_NEW_CONSOLE if platform.system() == "Windows" else 0
             proc = subprocess.Popen(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 text=True, creationflags=creation_flag
             )
             self.processes[name] = proc
             self.log(f" {name} launched (PID={proc.pid})")
-
         except Exception as e:
             self.log(f" {name} failed: {e}")
 
+    # System Monitor
     def system_monitor_loop(self):
         while True:
             if not self.start_time: 
                 time.sleep(1)
                 continue
-
             uptime = int(time.time() - self.start_time)
             self.up_tile.config(text=f"UPTIME: {uptime//60:02}:{uptime%60:02}")
-
             cpu = psutil.cpu_percent()
             ram = psutil.virtual_memory().percent
             self.sys_tile.config(text=f"CPU: {cpu}% | RAM: {ram}%")
-
             time.sleep(1)
 
+    # Heartbeat / Auto Restart
     def heartbeat_loop(self):
         while True:
             for name, proc in list(self.processes.items()):
@@ -155,16 +172,17 @@ class EnterpriseGatewayUI:
                     self.start_service(name, SERVICES[name])
             time.sleep(2)
 
+    # Run Tests
     def run_tests(self):
         self.log(" Running Validation Suite...")
         threading.Thread(target=lambda:
             subprocess.run(["python", "tests/test_latency.py"]), daemon=True
         ).start()
 
+    # Stop All Services
     def stop_all(self):
         self.log(" Power Down - Complete Shutdown")
         self.status_led.itemconfig(self.led_circle, fill="#f85149")
-
         for name, proc in self.processes.items():
             try:
                 p = psutil.Process(proc.pid)
