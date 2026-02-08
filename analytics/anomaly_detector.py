@@ -2,7 +2,6 @@ import numpy as np
 from collections import deque
 
 class AnomalyDetector:
-
     def __init__(self,event_bus,window=50):
 
         self.bus = event_bus
