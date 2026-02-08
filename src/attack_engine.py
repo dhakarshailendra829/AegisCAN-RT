@@ -1,7 +1,6 @@
 import random
 import time
 from core.event_bus import EventBus
-
 class AttackEngine:
 
     def __init__(self, event_bus: EventBus):
