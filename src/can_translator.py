@@ -29,7 +29,6 @@ class CANTranslator:
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    # allow reuse port (streamlit restart fix)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         sock.bind(("127.0.0.1", 5005))
@@ -53,7 +52,6 @@ class CANTranslator:
 
         raw = ble_data[0] if ble_data else 127
         steering_angle = self.scale_steering(raw)
-        # fake attack impact simulation
         if hasattr(self, "attack_mode"):
 
             if self.attack_mode == "flip":
