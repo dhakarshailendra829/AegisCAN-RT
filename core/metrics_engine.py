@@ -3,7 +3,6 @@ import time
 import threading
 
 class MetricsEngine:
-
     def __init__(self,event_bus):
 
         self.bus = event_bus
