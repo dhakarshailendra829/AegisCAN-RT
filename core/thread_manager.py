@@ -2,7 +2,6 @@ import threading
 import time
 
 class ThreadManager:
-
     def __init__(self):
         self.threads = {}
         self.lock = threading.Lock()
