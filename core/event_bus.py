@@ -2,7 +2,6 @@ import threading
 from collections import defaultdict
 
 class EventBus:
-
     def __init__(self):
         self.listeners = defaultdict(list)
         self.lock = threading.Lock()
