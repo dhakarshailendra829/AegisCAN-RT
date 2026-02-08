@@ -2,7 +2,6 @@ import logging
 import os
 
 class LoggerEngine:
-
     def __init__(self, log_file="data/system.log"):
 
         os.makedirs("data", exist_ok=True)
