@@ -1,0 +1,19 @@
+body {
+background-color:#0b0f14;
+color:#e6edf3;
+}
+
+.block-container {
+padding-top:1rem;
+}
+
+.metric-card{
+background:#161b22;
+padding:20px;
+border-radius:14px;
+box-shadow:0 0 20px rgba(0,255,255,0.05);
+}
+
+.sidebar .sidebar-content{
+background:#010409;
+}

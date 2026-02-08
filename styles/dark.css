@@ -1,0 +1,115 @@
+/* 1. ANIMATED CYBER GRID BACKGROUND */
+.stApp {
+    background: 
+        linear-gradient(rgba(10, 11, 16, 0.85), rgba(10, 11, 16, 0.85)),
+        url("https://www.transparenttextures.com/patterns/carbon-fibre.png"),
+        radial-gradient(circle at center, #1a1b26 0%, #050508 100%);
+    background-attachment: fixed;
+    color: #e0faff;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Moving Grid Overlay */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+        linear-gradient(to right, rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -1;
+    animation: moveGrid 20s linear infinite;
+}
+
+@keyframes moveGrid {
+    from { background-position: 0 0; }
+    to { background-position: 40px 40px; }
+}
+
+/* 2. CENTERED NEON METRICS */
+[data-testid="stMetric"] {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(112, 0, 255, 0.3) !important;
+    border-top: 3px solid #7000ff !important;
+    border-radius: 12px !important;
+    padding: 20px !important;
+    transition: all 0.4s ease;
+    text-align: center !important;
+}
+
+[data-testid="stMetric"]:hover {
+    border-color: #00f2ff !important;
+    border-top: 3px solid #00f2ff !important;
+    box-shadow: 0 0 25px rgba(0, 242, 255, 0.3) !important;
+    transform: translateY(-5px);
+}
+
+/* Force Center Alignment for Metric Elements */
+[data-testid="stMetricLabel"], 
+[data-testid="stMetricValue"], 
+[data-testid="stMetricDelta"] {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    text-align: center !important;
+}
+
+[data-testid="stMetricValue"] {
+    color: #00f2ff !important;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+    font-size: 2.2rem !important;
+    font-family: 'Courier New', monospace;
+}
+
+/* 3. GLASSMORPHISM CARDS (For Graphs) */
+div[data-testid="stVerticalBlock"] > div:has(div.card-glow) {
+    background: rgba(10, 11, 16, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid rgba(0, 242, 255, 0.2);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 4. FUTURISTIC BUTTONS (Sharp Edges) */
+.stButton>button {
+    background: transparent !important;
+    color: #00f2ff !important;
+    border: 2px solid #00f2ff !important;
+    text-shadow: 0 0 10px #00f2ff;
+    box-shadow: inset 0 0 10px rgba(0, 242, 255, 0.2);
+    font-size: 16px !important;
+    font-weight: bold !important;
+    clip-path: polygon(5% 0, 100% 0, 95% 100%, 0% 100%);
+    transition: 0.3s;
+}
+
+.stButton>button:hover {
+    background: #00f2ff !important;
+    color: #050508 !important;
+    box-shadow: 0 0 30px #00f2ff;
+}
+
+/* 5. SIDEBAR DESIGN */
+section[data-testid="stSidebar"] {
+    background: rgba(5, 5, 8, 0.95) !important;
+    border-right: 2px solid #7000ff;
+}
+
+/* 6. STATUS PULSE ANIMATION */
+.pulse-online {
+    color: #00ff88 !important;
+    text-shadow: 0 0 10px #00ff88;
+    animation: neonPulse 1.5s ease-in-out infinite alternate;
+}
+
+.status-red {
+    color: #ff4b4b !important;
+    text-shadow: 0 0 5px #ff4b4b;
+}
+
+@keyframes neonPulse {
+    from { opacity: 0.6; text-shadow: 0 0 5px #00ff88; }
+    to { opacity: 1; text-shadow: 0 0 20px #00ff88; }
+}
