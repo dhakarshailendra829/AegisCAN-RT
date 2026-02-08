@@ -10,7 +10,6 @@ from core.event_bus import EventBus
 
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
-
 class BLEReceiver:
 
     def __init__(self, event_bus: EventBus):
