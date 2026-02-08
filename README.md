@@ -162,5 +162,5 @@ python src/dashboard_gui.py
 
 Embedded Systems • CAN • BLE • Real-Time Systems  
 
-GitHub: https://github.com/dhakarshailendra829  
-LinkedIn: https://www.linkedin.com/in/shailendra-dhakad-063a98292/
+GitHub: [https://github.com/dhakarshailendra829](url)
+LinkedIn: [https://www.linkedin.com/in/shailendra-dhakad-063a98292/](url)
