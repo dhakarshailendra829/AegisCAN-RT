@@ -2,7 +2,6 @@ from collections import deque
 import numpy as np
 
 class LatencyPredictor:
-
     def __init__(self,event_bus):
 
         self.bus = event_bus
