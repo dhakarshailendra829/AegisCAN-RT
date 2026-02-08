@@ -6,7 +6,6 @@ from core.logger_engine import LoggerEngine
 from src.ble_receiver import BLEReceiver
 from src.can_translator import CANTranslator
 from src.attack_engine import AttackEngine
-
 class GatewayEngine:
 
     def __init__(self):
