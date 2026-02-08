@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">🛡️ AegisCAN-RT v3.0</h1>
+  <h1 align="center">🛡️ AegisCAN-RT v3.0.1</h1>
   <h3 align="center">Advanced Real-Time BLE → CAN Automotive Gateway & Security Lab</h3>
 </p>
 
@@ -13,10 +13,10 @@
 
 ---
 
-## 🚀 The Evolution: From Relay to Intelligence
-AegisCAN-RT is no longer just a bridge. It is a **Deterministic Automotive Command Center**. Version 3.0 introduces a high-fidelity Streamlit dashboard, a dedicated Cyber-Attack Simulation engine, and micro-second precision analytics.
+## The Evolution: From Relay to Intelligence
+AegisCAN-RT is no longer just a bridge. It is a **Deterministic Automotive Command Center**. Version 3.0.1 introduces a high-fidelity Streamlit dashboard, a dedicated Cyber-Attack Simulation engine, and micro-second precision analytics.
 
-### ⚡ Key Upgrades in v3.0
+### Key Upgrades in v3.0.1
 * **Streamlit Pro Dashboard:** Replaced static GUI with a web-based, hardware-accelerated telemetry hub.
 * **Oscilloscope Visualization:** Real-time Plotly charts for network latency and signal jitter.
 * **Attack Engine:** Native support for DoS (Denial of Service) and Bit-Flip injection testing.
@@ -59,26 +59,32 @@ flowchart TD
     UI --> PL
 
 ```
-| Issue             | Standard Gateways | AegisCAN‑RT              |
-| ----------------- | ----------------- | ------------------------ |
-| Latency           | High jitter       | Deterministic (~1 ms)    |
-| Protocol          | TCP blocking      | UDP real‑time            |
-| Message Priority  | Best‑effort       | Safety‑aware scheduling  |
-| Memory Copies     | Multiple          | Zero‑copy struct packing |
-| Fault Detection   | None              | Heartbeat watchdog       |
-| Timing Visibility | Absent            | µs‑level timestamping    |
+## Deterministic Gateway Comparison
+
+| Engineering Aspect | Conventional IoT Gateways | AegisCAN-RT Real-Time Gateway |
+| ------------------ | ------------------------- | ------------------------------ |
+| Latency Behavior   | Variable with high jitter | Deterministic (~1 ms target)   |
+| Communication Stack| TCP / Blocking Pipelines  | UDP Real-Time Streaming        |
+| Message Scheduling | FIFO / Best-Effort        | Priority-Aware Safety Queue    |
+| Memory Handling    | Multi-Copy Serialization  | Zero-Copy Struct Packing       |
+| Fault Monitoring   | Minimal / Reactive        | Heartbeat Watchdog + Detection |
+| Timing Visibility  | Millisecond Logs          | Microsecond Timestamping       |
+| Real-Time Safety   | Not Designed for Control  | ECU-Style Deterministic Logic  |
 
 ---
 
 ## Gateway Engineering Highlights
 
-| Feature                   | Engineering Impact                       |
-| ------------------------- | ---------------------------------------- |
-| Zero‑Copy Byte Packing    | Eliminates serialization overhead        |
-| Priority‑Driven Scheduler | Steering frames always preempt telemetry |
-| Heartbeat Watchdog (1 Hz) | Immediate fault and link‑loss detection  |
-| Thread‑Optimized I/O      | Zero packet drop under load              |
-| Latency Analytics         | End‑to‑end diagnostic visibility         |
+| Core Feature              | Technical Benefit / Engineering Value          |
+| ------------------------- | ---------------------------------------------- |
+| Zero-Copy Data Pipeline   | Minimizes latency and CPU overhead             |
+| Priority-Driven Scheduler | Critical steering frames preempt telemetry     |
+| Heartbeat Safety Watchdog | Detects link failure and packet loss instantly |
+| Multi-Threaded I/O Engine | Stable throughput under attack/load scenarios  |
+| Real-Time Latency Monitor | Continuous performance diagnostics             |
+| Attack Simulation Engine  | DOS / Bit-Flip / Heartbeat Fault Testing       |
+| Event Bus Architecture    | Modular and scalable internal communication    |
+| Streamlit Monitoring UI   | Live telemetry, analytics & system monitoring  |
 
 ---
 
@@ -94,7 +100,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 ---
-## 🛡️ Cyber-Security Vulnerability Lab
+## Cyber-Security Vulnerability Lab
 
 AegisCAN-RT is engineered as a stress-testing environment for automotive security researchers to evaluate CAN-bus resilience against common exploit vectors.
 
