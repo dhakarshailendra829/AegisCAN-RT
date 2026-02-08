@@ -14,7 +14,6 @@ except ImportError:
 
 from src.master_gateway import GatewayEngine
 
-# ---------------- CONFIG & SYSTEM ----------------
 @st.cache_data
 def load_config():
     try:
@@ -37,11 +36,9 @@ def load_css():
     except:
         pass
 
-# ---------------- PAGE SETUP ----------------
 st.set_page_config(page_title="AegisCAN-RT Platform", layout="wide")
 load_css()
 
-# Refresh every 2 seconds
 st_autorefresh(interval=2000, key="datarefresh")
 
 if "engine" not in st.session_state:
@@ -49,28 +46,25 @@ if "engine" not in st.session_state:
 
 engine = st.session_state.engine
 
-# ---------------- SIDEBAR ----------------
 st.sidebar.markdown('<p class="header-glow">🛡 AEGIS-CAN</p>', unsafe_allow_html=True)
 tab = st.sidebar.radio("SYSTEM CONTROL", ["Live Telemetry", "Security Center", "Analytics", "System Monitor", "Logs"])
 
 st.sidebar.markdown("---")
-if st.sidebar.button("🚀 START GATEWAY", use_container_width=True):
+if st.sidebar.button("START GATEWAY", use_container_width=True):
     if not engine.running: engine.start()
-if st.sidebar.button("🛑 STOP GATEWAY", use_container_width=True):
+if st.sidebar.button("STOP GATEWAY", use_container_width=True):
     engine.stop()
 
-# ---------------- HEADER (CENTERED & COLORFUL) ----------------
 st.markdown("""
     <div style="text-align: center; padding: 10px 0px 30px 0px;">
         <h1 style="font-size: 45px; margin-bottom: 0px;">
-            <span style="color: #00f2ff; text-shadow: 0 0 15px #00f2ff;">🚗 AegisCAN</span> 
+            <span style="color: #00f2ff; text-shadow: 0 0 15px #00f2ff;">AegisCAN</span> 
             <span style="color: #ffffff;">Real-Time</span> 
             <span style="color: #7000ff; text-shadow: 0 0 15px #7000ff;">Automotive Gateway</span>
         </h1>
     </div>
 """, unsafe_allow_html=True)
 
-# Status Badge centered below Title
 status_class = "pulse-online" if engine.running else "status-red"
 status_text = "SYSTEM ACTIVE" if engine.running else "SYSTEM STANDBY"
 st.markdown(f"""
@@ -81,11 +75,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# ======================================================
-# 🔴 LIVE TELEMETRY
-# ======================================================
 if tab == "Live Telemetry":
-    # Using container-divs with custom CSS class to force centering
     col1, col2, col3 = st.columns(3)
     stats = get_system_stats(engine)
     
@@ -107,7 +97,6 @@ if tab == "Live Telemetry":
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown('<div class="card-glow"><h3 style="color:#00f2ff;">📡 Signal Latency Stream</h3></div>', unsafe_allow_html=True)
     
-    # Graphs Logic
     if len(engine.telemetry) > 5:
         df = pd.DataFrame(engine.telemetry)
         st.area_chart(df["latency"].tail(50), color="#00f2ff")
@@ -115,13 +104,10 @@ if tab == "Live Telemetry":
         df = pd.read_csv("data/telemetry_log.csv")
         st.area_chart(df.iloc[-50:, -1], color="#00f2ff")
     else:
-        # Dummy "Scanning" Data
         dummy_data = np.random.normal(20, 5, size=50)
         st.area_chart(dummy_data, color="#7000ff")
         st.caption("✨ Simulating active CAN-bus stream...")
-# ======================================================
-# 🛡 SECURITY CENTER
-# ======================================================
+
 elif tab == "Security Center":
     st.markdown('<div class="card-glow"><h3>🛡 Threat Simulation & Mitigation</h3></div>', unsafe_allow_html=True)
     
@@ -147,14 +133,11 @@ elif tab == "Security Center":
         st.success("No intrusions detected. Firewall at 100% integrity.")
 
 elif tab == "Analytics":
-    st.markdown('<div class="card-glow"><h3>📊 ADVANCED NEURAL ANALYTICS</h3></div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-glow"><h3>ADVANCED NEURAL ANALYTICS</h3></div>', unsafe_allow_html=True)
 
-    # --- INTELLIGENT DATA ENGINE ---
-    # We create a more complex dataset to make the graphs look "Full" and Professional
     if os.path.exists("data/latency_analysis.csv"):
         df = pd.read_csv("data/latency_analysis.csv")
     else:
-        # Generate Advanced Multi-Column Dummy Data
         rows = 50
         df = pd.DataFrame({
             'Timestamp': pd.date_range(start=datetime.now(), periods=rows, freq='S'),
@@ -164,30 +147,24 @@ elif tab == "Analytics":
             'Engine Temp': np.random.uniform(60, 85, size=rows)
         })
 
-    # --- ROW 1: DUAL PRIMARY GRAPHS ---
     g1, g2 = st.columns(2)
     
     with g1:
         st.markdown('<p class="glow-text" style="font-size:12px;">SIGNAL LATENCY SPECTRUM</p>', unsafe_allow_html=True)
-        # Using Area Chart with Neon Cyan
         st.area_chart(df.set_index('Timestamp')['Latency (ms)'], color="#00f2ff", use_container_width=True)
     
     with g2:
         st.markdown('<p class="glow-text" style="font-size:12px;">PACKET INTEGRITY (REAL-TIME)</p>', unsafe_allow_html=True)
-        # Using Line Chart with Neon Purple
         st.line_chart(df.set_index('Timestamp')['Packet Stability (%)'], color="#7000ff", use_container_width=True)
 
-    # --- ROW 2: FULL WIDTH PERFORMANCE MATRIX ---
     st.markdown("---")
     st.markdown('<p class="glow-text" style="font-size:12px;">THREAT PROBABILITY & ANOMALY DETECTION</p>', unsafe_allow_html=True)
     
-    # Advanced Multi-line Plot
     st.line_chart(
         df.set_index('Timestamp')[['Threat Probability (%)', 'Engine Temp']], 
-        color=["#ff0055", "#00ff88"] # Pink for Threats, Green for Temp
+        color=["#ff0055", "#00ff88"] 
     )
 
-    # --- ROW 3: DATA GRID ---
     st.markdown('<div class="card-glow">', unsafe_allow_html=True)
     col_a, col_b = st.columns([2, 1])
     with col_a:
@@ -198,31 +175,26 @@ elif tab == "Analytics":
             hide_index=True
         )
     with col_b:
-        st.markdown("### ⚙️ SYSTEM HEALTH")
+        st.markdown("### SYSTEM HEALTH")
         avg_lat = round(df['Latency (ms)'].mean(), 2)
         st.metric("AVG LATENCY", f"{avg_lat}ms", delta="-1.2ms")
         st.metric("PEAK STABILITY", "99.92%", delta="0.05%")
         st.progress(0.85, text="Kernel Load")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ======================================================
-# 🖥 SYSTEM MONITOR & LOGS (Simplified for Performance)
-# ======================================================
 elif tab == "System Monitor":
-    st.markdown('<div class="card-glow"><h3>🧠 Thread Architecture</h3></div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-glow"><h3>Thread Architecture</h3></div>', unsafe_allow_html=True)
     if engine.threads:
         st.table([{"ID": t.name, "Status": "ACTIVE", "Engine": "V8-Core"} for t in engine.threads])
     else:
         st.info("System in Low Power Mode.")
 
 elif tab == "Logs":
-    st.markdown("### 📜 Raw Kernel Output")
+    st.markdown("### Raw Kernel Output")
     if os.path.exists("data/telemetry_log.csv"):
         st.dataframe(pd.read_csv("data/telemetry_log.csv").tail(50), use_container_width=True)
     else:
         st.code("LOG_INIT: Waiting for Gateway Start...")
 
-# ---------------- FOOTER ----------------
 st.markdown("---")
-# REMOVED SECONDS to prevent flickering text distraction
-st.caption(f"CORE SYNC: {datetime.now().strftime('%H:%M')} | ENCRYPTION: AES-256-GCM | REGION: GLOBAL-CAN-01")
+st.caption(f"CORE SYNC: {datetime.now().strftime('%H:%M')} | ENCRYPTION: AES-256-GCM | REGION: GLOBAL-CAN-01 | Version 3.0.1")
