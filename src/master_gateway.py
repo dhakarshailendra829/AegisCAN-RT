@@ -7,7 +7,6 @@ from src.ble_receiver import BLEReceiver
 from src.can_translator import CANTranslator
 from src.attack_engine import AttackEngine
 
-
 class GatewayEngine:
 
     def __init__(self):
@@ -25,7 +24,6 @@ class GatewayEngine:
 
         os.makedirs("data", exist_ok=True)
 
-        # subscribe to CAN telemetry
         self.bus.subscribe("can.tx", self._on_can_tx)
         self.bus.subscribe("attack.event", self._on_attack)
     def _on_can_tx(self, data):
@@ -35,7 +33,6 @@ class GatewayEngine:
 
         if len(self.telemetry) > 300:
             self.telemetry.pop(0)
-
 
     def _on_attack(self, data):
 
@@ -49,7 +46,6 @@ class GatewayEngine:
         if len(self.telemetry) > 500:
             self.telemetry.pop(0)
 
-        # append CSV
         with open("data/telemetry_log.csv", "a", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["angle","latency","queue"])
             if f.tell() == 0:
