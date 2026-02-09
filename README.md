@@ -107,7 +107,7 @@ AegisCAN-RT is engineered as a stress-testing environment for automotive securit
 | Attack Vector | Engineering Objective | Impact on System |
 | :--- | :--- | :--- |
 | **🔥 DoS Attack** | Floods the high-priority queue with junk frames. | Tests **Steering Frame Preemption** and scheduler determinism under heavy congestion. |
-| **🧬 Bit-Flip Simulation** | Dynamically corrupts specific bits in the sensor payload. | Evaluates the robustness of **CRC Checksums** and Safety Logic in the translation layer. |
+| **🧬 Bit-Flip Simulation** | Dynamically corrupts specific bits in the sensor payload. | Evaluates the robustness of **CRC Checksums** and Safety Logics in the translation layer. |
 | **💔 Heartbeat Drop** | Intercepts and drops the 1Hz safety watchdog signal. | Triggers **Automotive Fail-Safes** to ensure the system enters a 'Safe State' upon link loss. |
 
 > **Note:** These tools are intended for simulation and defensive research only. Always use a virtual CAN (`vcan0`) or a closed hardware loop for testing.
@@ -129,7 +129,7 @@ AegisCAN-RT is engineered as a stress-testing environment for automotive securit
 
 **Shailendra Dhakad**  
 
-Embedded Systems • CAN • BLE • Real-Time Systems  
+Software Development • Embedded Systems • CAN • BLE • Real-Time Systems   
 
 🔗 [GitHub](https://github.com/dhakarshailendra829)  
 🔗 [LinkedIn](https://www.linkedin.com/in/shailendra-dhakad-063a98292/)  
