@@ -36,104 +36,167 @@ def load_css():
     except:
         pass
 
-st.set_page_config(page_title="AegisCAN-RT Platform", layout="wide")
+st.set_page_config(page_title="AegisCAN-RT Command Center", layout="wide", initial_sidebar_state="expanded")
 load_css()
 
-st_autorefresh(interval=2000, key="datarefresh")
+st_autorefresh(interval=100000, key="datarefresh")
 
 if "engine" not in st.session_state:
     st.session_state.engine = GatewayEngine()
 
 engine = st.session_state.engine
 
-st.sidebar.markdown('<p class="header-glow">🛡 AEGIS-CAN</p>', unsafe_allow_html=True)
-tab = st.sidebar.radio("SYSTEM CONTROL", ["Live Telemetry", "Security Center", "Analytics", "System Monitor", "Logs"])
+with st.sidebar:
+    st.markdown("""
+        <div style='text-align: center; padding: 10px; border: 1px double #00f2ff; border-radius: 10px; background: rgba(0,242,255,0.05);'>
+            <h1 style='color: #00f2ff; text-shadow: 0 0 20px #00f2ff; margin-bottom: 0; font-size: 25px;'>AEGIS-CAN</h1>
+            <p style='color: #7000ff; letter-spacing: 2px; font-size: 0.7rem; font-weight: bold;'>PREMIUM GATEWAY v3.0</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('<div class="sidebar-box" style="margin-top:20px;">', unsafe_allow_html=True)
+    tab = st.radio("OPERATIONAL INTERFACE", ["Live Telemetry", "Security Center", "Analytics", "System Monitor", "Logs"])
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown("<p style='font-size:10px; color:#8B949E; margin-bottom:5px;'>HARDWARE CONTROL</p>", unsafe_allow_html=True)
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        if st.button("DEPLOY", use_container_width=True):
+            if not engine.running: engine.start()
+    with btn_col2:
+        if st.button("KILL", type="primary", use_container_width=True):
+            engine.stop()
+            
+    st.markdown("""
+        <div style='margin-top: 30px; padding: 15px; border-left: 3px solid #7000ff; background: rgba(112, 0, 255, 0.05); border-radius: 0 10px 10px 0;'>
+            <p style='font-size: 10px; color: #7000ff; margin: 0; font-weight:bold;'>NODE ENCRYPTION</p>
+            <p style='font-size: 14px; color: #00f2ff; margin: 0; font-family: monospace;'>AES-256-GCM ACTIVE</p>
+            <hr style='margin: 10px 0; border-color: rgba(112,0,255,0.2);'>
+            <p style='font-size: 10px; color: #8B949E; margin: 0;'>REGION</p>
+            <p style='font-size: 12px; color: #ffffff; margin: 0;'>GLOBAL-CAN-01</p>
+        </div>
+    """, unsafe_allow_html=True)
 
-st.sidebar.markdown("---")
-if st.sidebar.button("START GATEWAY", use_container_width=True):
-    if not engine.running: engine.start()
-if st.sidebar.button("STOP GATEWAY", use_container_width=True):
-    engine.stop()
-
-st.markdown("""
-    <div style="text-align: center; padding: 10px 0px 30px 0px;">
-        <h1 style="font-size: 45px; margin-bottom: 0px;">
-            <span style="color: #00f2ff; text-shadow: 0 0 15px #00f2ff;">AegisCAN</span> 
-            <span style="color: #ffffff;">Real-Time</span> 
-            <span style="color: #7000ff; text-shadow: 0 0 15px #7000ff;">Automotive Gateway</span>
-        </h1>
+now = datetime.now()
+st.markdown(f"""
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(0,242,255,0.03); border-radius: 15px; border: 1px solid rgba(0,242,255,0.1); margin-bottom: 25px;">
+        <div style="text-align: left;">
+            <p style="margin:0; color:#8B949E; font-size:10px; letter-spacing:2px;">OPERATOR IDENTITY</p>
+            <p style="margin:0; color:#00f2ff; font-weight:bold; font-family: monospace;">SHILENDRA Dhakad | Software Engineer</p>
+        </div>
+        <div style="text-align: center;">
+            <h1 class="glitch-text" style="font-size: 32px; margin:0; letter-spacing:5px;">AEGIS-CAN COMMAND CENTER</h1>
+            <p style="margin:0; color:#8B949E; font-size:10px; letter-spacing:4px;">NEXT-GEN AUTOMOTIVE SECURITY INTERFACE</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="margin:0; color:#7000ff; font-family: monospace; font-weight:bold;">{now.strftime('%A')}</p>
+            <p style="margin:0; color:white; font-size: 20px; font-weight:bold; font-family: monospace;">{now.strftime('%d %b %Y | %H:%M:%S')}</p>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
 status_class = "pulse-online" if engine.running else "status-red"
-status_text = "SYSTEM ACTIVE" if engine.running else "SYSTEM STANDBY"
+status_text = "GATEWAY ACTIVE" if engine.running else "GATEWAY STANDBY"
 st.markdown(f"""
-    <div style="text-align: center; margin-top: -25px; margin-bottom: 40px;">
-        <span class="{status_class}" style="font-size: 1.1rem; letter-spacing: 2px; background: rgba(0,0,0,0.4); padding: 8px 25px; border-radius: 5px; border: 1px solid rgba(0,242,255,0.2);">
-            {status_text} &nbsp; | &nbsp; NODE COUNT: {len(engine.threads)}
-        </span>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <span class="{status_class}" style="padding: 5px 20px; border-radius: 5px; font-size: 0.9rem; font-weight:bold; border: 1px solid;">{status_text}</span>
+        <span style="background: rgba(112,0,255,0.1); color:#7000ff; border: 1px solid #7000ff; padding: 5px 20px; border-radius: 5px; font-size: 0.9rem; margin-left:10px; font-weight:bold;">NODE: VCAN-0x829</span>
+        <span style="background: rgba(255,255,255,0.05); color:white; border: 1px solid rgba(255,255,255,0.2); padding: 5px 20px; border-radius: 5px; font-size: 0.9rem; margin-left:10px; font-weight:bold;">CORES: {len(engine.threads)} ACTIVE</span>
     </div>
 """, unsafe_allow_html=True)
 
 if tab == "Live Telemetry":
-    col1, col2, col3 = st.columns(3)
+    m1, m2, m3 = st.columns(3)
     stats = get_system_stats(engine)
     
-    with col1:
-        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        st.metric("NETWORK LOAD", f"{stats['cpu']}%", "+2.5% [PEAK]")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-    with col2:
-        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        st.metric("BUFFER USAGE", f"{stats['ram']}%", "-0.8% [SAFE]")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-    with col3:
-        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        st.metric("IO THREADS", stats["threads"], "RUNNING")
-        st.markdown('</div>', unsafe_allow_html=True)
+    with m1:
+        st.markdown(f"""<div class="metric-card">
+            <p class="metric-label">SYSTEM LOAD</p>
+            <h2 class="metric-value">{stats['cpu']}%</h2>
+            <p class="metric-delta">↑ 2.5% [PEAK RELAY]</p>
+        </div>""", unsafe_allow_html=True)
+    with m2:
+        st.markdown(f"""<div class="metric-card">
+            <p class="metric-label">KERNEL BUFFER</p>
+            <h2 class="metric-value">{stats['ram']}%</h2>
+            <p class="metric-delta" style="color:#00f2ff;">STABLE ALLOCATION</p>
+        </div>""", unsafe_allow_html=True)
+    with m3:
+        st.markdown(f"""<div class="metric-card" style="border-right: 4px solid #7000ff;">
+            <p class="metric-label">IO PIPELINES</p>
+            <h2 class="metric-value">{stats['threads']}</h2>
+            <p class="metric-delta" style="color:#7000ff;">ACTIVE THREADS</p>
+        </div>""", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="card-glow"><h3 style="color:#00f2ff;">📡 Signal Latency Stream</h3></div>', unsafe_allow_html=True)
     
-    if len(engine.telemetry) > 5:
-        df = pd.DataFrame(engine.telemetry)
-        st.area_chart(df["latency"].tail(50), color="#00f2ff")
-    elif os.path.exists("data/telemetry_log.csv"):
-        df = pd.read_csv("data/telemetry_log.csv")
-        st.area_chart(df.iloc[-50:, -1], color="#00f2ff")
-    else:
-        dummy_data = np.random.normal(20, 5, size=50)
-        st.area_chart(dummy_data, color="#7000ff")
-        st.caption("✨ Simulating active CAN-bus stream...")
+    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#00f2ff; margin-bottom:20px;'>Signal Latency Oscilloscope (ms)</h3>", unsafe_allow_html=True)
+
+    chart_placeholder = st.empty()
+
+    while engine.running:
+        if len(engine.telemetry) > 5:
+            df = pd.DataFrame(engine.telemetry)
+            chart_placeholder.area_chart(df["latency"].tail(50), use_container_width=True)
+
+        elif os.path.exists("data/telemetry_log.csv"):
+            df = pd.read_csv("data/telemetry_log.csv")
+            chart_placeholder.area_chart(df.iloc[-50:, -1], use_container_width=True)
+
+        else:
+            dummy_data = np.random.normal(20, 5, size=50)
+            chart_placeholder.area_chart(dummy_data)
+
+        time.sleep(1)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
 elif tab == "Security Center":
-    st.markdown('<div class="card-glow"><h3>🛡 Threat Simulation & Mitigation</h3></div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">VULNERABILITY LAB & THREAT VECTOR</h2>', unsafe_allow_html=True)
     
     c1, c2, c3 = st.columns(3)
-    if c1.button("⚠ DoS ATTACK"): engine.run_attack("dos")
-    if c2.button("🧬 BIT FLIP"): engine.run_attack("flip")
-    if c3.button("💔 HEARTBEAT"): engine.run_attack("heart")
+    with c1: 
+        if st.button("INJECT DoS ATTACK", use_container_width=True): engine.run_attack("dos")
+    with c2: 
+        if st.button("TRIGGER BIT-FLIP", use_container_width=True): engine.run_attack("flip")
+    with c3: 
+        if st.button("DROP HEARTBEAT", use_container_width=True): engine.run_attack("heart")
 
-    st.markdown("---")
-    st.markdown("### 🧬 Neural Event Matrix")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    if len(engine.telemetry) > 0:
-        events = pd.DataFrame(engine.telemetry[-8:])
-        for idx, row in events.iterrows():
-            st.markdown(f"""
-                <div style="padding:10px; border-left:4px solid #ff0055; background:rgba(255,0,85,0.1); margin-bottom:5px;">
-                    <span style="color:#ff0055; font-weight:bold;">[ALERT]</span> 
-                    Signal ID: {row.get('id', 'Unknown')} | Latency: {row.get('latency', '0')}ms | 
-                    Status: <span style="color:#00f2ff;">Verified Intercept</span>
-                </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.success("No intrusions detected. Firewall at 100% integrity.")
+    col_l, col_r = st.columns([2,1])
+    with col_l:
+        st.markdown("### Neural Event Matrix")
+        if len(engine.telemetry) > 0:
+            events = pd.DataFrame(engine.telemetry[-8:])
+            for idx, row in events.iterrows():
+                st.markdown(f"""
+                    <div class="event-alert">
+                        <span style="color:#ff0055; font-weight:bold;">[THREAT DETECTED]</span> 
+                        ID: {row.get('id', 'N/A')} | Latency: {row.get('latency', '0')}ms | Vector: CAN-X
+                    </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.success("No intrusions detected. Firewall at 100% integrity.")
+            
+    with col_r:
+        st.markdown("### Threat Analysis")
+        risk_color = "#00ff88" if not engine.telemetry else "#ff0055"
+        risk_label = "SECURE" if not engine.telemetry else "ALERT"
+        st.markdown(f"""
+            <div style="height: 180px; width: 180px; border-radius: 50%; border: 8px double {risk_color}; 
+                        display: flex; flex-direction: column; align-items: center; justify-content: center; margin: auto;
+                        box-shadow: 0 0 30px {risk_color}33; background: rgba(0,0,0,0.2);">
+                <p style="margin:0; color:#8B949E; font-size:10px;">LEVEL</p>
+                <h2 style="color: {risk_color}; margin: 0; font-family: monospace;">{risk_label}</h2>
+            </div>
+        """, unsafe_allow_html=True)
 
 elif tab == "Analytics":
-    st.markdown('<div class="card-glow"><h3>ADVANCED NEURAL ANALYTICS</h3></div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">ADVANCED ANALYTICS KERNEL</h2>', unsafe_allow_html=True)
 
     if os.path.exists("data/latency_analysis.csv"):
         df = pd.read_csv("data/latency_analysis.csv")
@@ -148,53 +211,32 @@ elif tab == "Analytics":
         })
 
     g1, g2 = st.columns(2)
-    
     with g1:
-        st.markdown('<p class="glow-text" style="font-size:12px;">SIGNAL LATENCY SPECTRUM</p>', unsafe_allow_html=True)
-        st.area_chart(df.set_index('Timestamp')['Latency (ms)'], color="#00f2ff", use_container_width=True)
-    
+        st.caption("SIGNAL LATENCY SPECTRUM")
+        st.area_chart(df.set_index('Timestamp')['Latency (ms)'], color="#00f2ff")
     with g2:
-        st.markdown('<p class="glow-text" style="font-size:12px;">PACKET INTEGRITY (REAL-TIME)</p>', unsafe_allow_html=True)
-        st.line_chart(df.set_index('Timestamp')['Packet Stability (%)'], color="#7000ff", use_container_width=True)
+        st.caption("PACKET INTEGRITY (REAL-TIME)")
+        st.line_chart(df.set_index('Timestamp')['Packet Stability (%)'], color="#7000ff")
 
-    st.markdown("---")
-    st.markdown('<p class="glow-text" style="font-size:12px;">THREAT PROBABILITY & ANOMALY DETECTION</p>', unsafe_allow_html=True)
-    
-    st.line_chart(
-        df.set_index('Timestamp')[['Threat Probability (%)', 'Engine Temp']], 
-        color=["#ff0055", "#00ff88"] 
-    )
-
-    st.markdown('<div class="card-glow">', unsafe_allow_html=True)
-    col_a, col_b = st.columns([2, 1])
-    with col_a:
-        st.markdown("### 🛰 DATA KERNEL RECORDS")
-        st.dataframe(
-            df.sort_values(by='Timestamp', ascending=False).head(15), 
-            use_container_width=True,
-            hide_index=True
-        )
-    with col_b:
-        st.markdown("### SYSTEM HEALTH")
-        avg_lat = round(df['Latency (ms)'].mean(), 2)
-        st.metric("AVG LATENCY", f"{avg_lat}ms", delta="-1.2ms")
-        st.metric("PEAK STABILITY", "99.92%", delta="0.05%")
-        st.progress(0.85, text="Kernel Load")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("### Data Kernel Records")
+    st.dataframe(df.sort_values(by='Timestamp', ascending=False).head(15), use_container_width=True)
 
 elif tab == "System Monitor":
-    st.markdown('<div class="card-glow"><h3>Thread Architecture</h3></div>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">THREAD ARCHITECTURE</h2>', unsafe_allow_html=True)
     if engine.threads:
-        st.table([{"ID": t.name, "Status": "ACTIVE", "Engine": "V8-Core"} for t in engine.threads])
+        st.table([{"ID": t.name, "Status": "RUNNING", "Priority": "REAL-TIME", "Load": "LOW"} for t in engine.threads])
     else:
-        st.info("System in Low Power Mode.")
+        st.info("No active threads. System idling.")
 
 elif tab == "Logs":
-    st.markdown("### Raw Kernel Output")
+    st.markdown('<h2 class="section-title">RAW KERNEL OUTPUT</h2>', unsafe_allow_html=True)
     if os.path.exists("data/telemetry_log.csv"):
-        st.dataframe(pd.read_csv("data/telemetry_log.csv").tail(50), use_container_width=True)
+        st.dataframe(pd.read_csv("data/telemetry_log.csv").tail(100), use_container_width=True)
     else:
-        st.code("LOG_INIT: Waiting for Gateway Start...")
+        st.code("LOG_INIT: Initializing kernel interface... [OK]\nLISTENING ON VCAN0... [OK]\nWAITING FOR PACKETS...")
 
-st.markdown("---")
-st.caption(f"CORE SYNC: {datetime.now().strftime('%H:%M')} | ENCRYPTION: AES-256-GCM | REGION: GLOBAL-CAN-01 | Version 3.0.1")
+st.markdown(f"""
+    <div class="footer">
+        CORE SYNC: {now.strftime('%H:%M:%S')} | ENCRYPTION: AES-256-GCM | REGION: GLOBAL-CAN-01 | Version v3.0.2
+    </div>
+""", unsafe_allow_html=True)
