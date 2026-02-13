@@ -12,7 +12,7 @@
 </p>
 
 ---
-> **Release v3.0.2:** Performance optimizations, enhanced attack simulation logic, improved telemetry processing, and refined deterministic gateway behavior.
+> **Latest Version v3.0.2:** Performance optimizations, enhanced attack simulation logic, improved telemetry processing, and refined deterministic gateway behavior.
 > **Old Version v3.0.1:** 
 
 ## The Evolution: From Relay to Intelligence
