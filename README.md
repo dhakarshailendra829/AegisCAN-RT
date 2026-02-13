@@ -12,7 +12,8 @@
 </p>
 
 ---
-> 📦 **Release v3.0.2:** Performance optimizations, enhanced attack simulation logic, improved telemetry processing, and refined deterministic gateway behavior.
+> **Release v3.0.2:** Performance optimizations, enhanced attack simulation logic, improved telemetry processing, and refined deterministic gateway behavior.
+> **Old Version v3.0.1:** 
 
 ## The Evolution: From Relay to Intelligence
 AegisCAN-RT is no longer just a bridge. It is a **Deterministic Automotive Command Center**. Version 3.0.2 introduces a high-fidelity Streamlit dashboard, a dedicated Cyber-Attack Simulation engine, and micro-second precision analytics.
