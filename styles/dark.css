@@ -82,7 +82,7 @@
 .metric-card:hover {
     transform: scale(1.05);
     border-color: var(--neon-cyan) !important;
-    box-shadow: 0 0 40px rgba(0, 242, 255, 0.3);
+    box-shadow: 0 0 40px rgba(3, 109, 115, 0.748);
 }
 
 .metric-value {
@@ -95,7 +95,7 @@
 section[data-testid="stSidebar"] {
     background: linear-gradient(to bottom, #05080f, #0a0b10) !important;
     border-right: 2px solid var(--neon-purple) !important;
-    box-shadow: 5px 0 20px rgba(112, 0, 255, 0.2);
+    box-shadow: 5px 0 20px rgba(45, 1, 103, 0.852);
 }
 
 .stButton>button {
@@ -121,7 +121,7 @@ section[data-testid="stSidebar"] {
     border: 1px solid var(--neon-green);
     padding: 10px 30px;
     text-shadow: 0 0 10px var(--neon-green);
-    box-shadow: inset 0 0 15px rgba(0, 255, 136, 0.2);
+    box-shadow: inset 0 0 15px rgba(4, 103, 57, 0.797);
     animation: neonGlow 1.5s ease-in-out infinite alternate;
 }
 
@@ -131,9 +131,9 @@ section[data-testid="stSidebar"] {
 }
 
 .event-alert {
-    background: rgba(255, 0, 85, 0.1);
+    background: rgba(190, 7, 68, 0.763);
     border-left: 5px solid var(--neon-pink);
-    color: #ff99bb;
+    color: #c709cd;
     font-weight: bold;
     padding: 15px;
     margin-top: 10px;
@@ -148,10 +148,10 @@ section[data-testid="stSidebar"] {
 
 .chart-container {
     background: rgba(10, 15, 30, 0.8) !important;
-    border: 1px solid rgba(0, 242, 255, 0.2) !important;
+    border: 1px solid rgba(0, 242, 255, 0.432) !important;
     border-top: 4px solid var(--neon-purple) !important;
     padding: 25px !important;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.493);
 }
 
 [data-testid="stDataFrame"] {

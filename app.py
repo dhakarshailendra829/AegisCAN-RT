@@ -84,7 +84,7 @@ st.markdown(f"""
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(0,242,255,0.03); border-radius: 15px; border: 1px solid rgba(0,242,255,0.1); margin-bottom: 25px;">
         <div style="text-align: left;">
             <p style="margin:0; color:#8B949E; font-size:10px; letter-spacing:2px;">OPERATOR IDENTITY</p>
-            <p style="margin:0; color:#00f2ff; font-weight:bold; font-family: monospace;">SHILENDRA Dhakad | Software Engineer</p>
+            <p style="margin:0; color:#00f2ff; font-weight:bold; font-family: monospace;">SHILENDRA Dhakad  Software Engineer</p>
         </div>
         <div style="text-align: center;">
             <h1 class="glitch-text" style="font-size: 32px; margin:0; letter-spacing:5px;">AEGIS-CAN COMMAND CENTER</h1>
