@@ -22,7 +22,7 @@ AegisCAN-RT is no longer just a bridge. It is a **Deterministic Automotive Comma
 * **Streamlit Pro Dashboard:** Replaced static GUI with a web-based, hardware-accelerated telemetry hub.
 * **Oscilloscope Visualization:** Real-time Plotly charts for network latency and signal jitter.
 * **Attack Engine:** Native support for DoS (Denial of Service) and Bit-Flip injection testing.
-* **Modular Core:** Clean separation between `core/` (threading/events) and `analytics/` (AI-ready predictors).
+* **Modular Core:** Clean separation between "threading/events" and "AI-ready predictors".
 
 ---
 ## Automotive Real-Time Gateway & Security Research Platform
