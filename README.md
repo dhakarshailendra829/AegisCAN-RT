@@ -152,7 +152,7 @@ The platform functions as a controlled CAN-bus security experimentation environm
 
 **Shailendra Dhakad**  
 
-Software Development • Embedded Systems • CAN • BLE • Real-Time Systems   
+Software Development • Embedded Systems • CAN • BLE • Real-Time Systems * Backnd Developer  
 
 🔗 [GitHub](https://github.com/dhakarshailendra829)  
 🔗 [LinkedIn](https://www.linkedin.com/in/shailendra-dhakad-063a98292/)  
