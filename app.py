@@ -13,7 +13,6 @@ except ImportError:
     st.error("Please run: pip install streamlit-autorefresh")
 
 from src.master_gateway import GatewayEngine
-# ================= AUTH SYSTEM =================
 
 DB_FILE = "data/users.csv"
 
@@ -67,7 +66,6 @@ def load_css():
 
 st.set_page_config(page_title="AegisCAN-RT Command Center", layout="wide", initial_sidebar_state="expanded")
 load_css()
-# ================= LOGIN SCREEN =================
 
 if not st.session_state.logged_in:
 
