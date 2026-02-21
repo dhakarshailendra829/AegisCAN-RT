@@ -13,7 +13,36 @@ except ImportError:
     st.error("Please run: pip install streamlit-autorefresh")
 
 from src.master_gateway import GatewayEngine
+# ================= AUTH SYSTEM =================
 
+DB_FILE = "data/users.csv"
+
+def init_db():
+    if not os.path.exists(DB_FILE):
+        df = pd.DataFrame(columns=["name", "email", "password"])
+        df.to_csv(DB_FILE, index=False)
+
+def add_user(name, email, password):
+    df = pd.read_csv(DB_FILE)
+    if email in df['email'].values:
+        return False
+    new_user = pd.DataFrame([[name, email, password]],
+                            columns=["name", "email", "password"])
+    new_user.to_csv(DB_FILE, mode='a', header=False, index=False)
+    return True
+
+def verify_user(email, password):
+    df = pd.read_csv(DB_FILE)
+    user = df[(df['email'] == email) & (df['password'] == password)]
+    return not user.empty
+
+init_db()
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "auth_mode" not in st.session_state:
+    st.session_state.auth_mode = "login"
 @st.cache_data
 def load_config():
     try:
@@ -38,7 +67,94 @@ def load_css():
 
 st.set_page_config(page_title="AegisCAN-RT Command Center", layout="wide", initial_sidebar_state="expanded")
 load_css()
+# ================= LOGIN SCREEN =================
 
+if not st.session_state.logged_in:
+
+    IMAGE_PATH = "assets/logo.png"
+
+    st.markdown(f"""
+    <style>
+    .auth-container {{
+        display: flex;
+        height: 90vh;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+    }}
+    .auth-left {{
+        flex: 1;
+        background: url('{IMAGE_PATH}');
+        background-size: cover;
+        background-position: center;
+    }}
+    .auth-right {{
+        flex: 1;
+        background: linear-gradient(135deg, #0f0c29, #1a1f3a);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px;
+        color: white;
+    }}
+    .stTextInput>div>div>input {{
+        background-color: rgba(255,255,255,0.08);
+        color: white;
+    }}
+    .stButton>button {{
+        width: 100%;
+        background: linear-gradient(90deg,#00f2ff,#7000ff);
+        border: none;
+        color: white;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1,1])
+
+    with col1:
+        if os.path.exists(IMAGE_PATH):
+            st.image(IMAGE_PATH, use_container_width=True)
+        else:
+            st.warning("Login background image not found. Put image in assets/logo.png")
+
+    with col2:
+        st.markdown("<h1 style='color:#00f2ff;'>AegisCAN-RT Access</h1>", unsafe_allow_html=True)
+
+        if st.session_state.auth_mode == "login":
+
+            email = st.text_input("Username / Email")
+            password = st.text_input("Password", type="password")
+
+            if st.button("Login"):
+                if verify_user(email, password):
+                    st.session_state.logged_in = True
+                    st.rerun()
+                else:
+                    st.error("Invalid Credentials")
+
+            if st.button("Sign Up"):
+                st.session_state.auth_mode = "signup"
+                st.rerun()
+
+        else:
+            name = st.text_input("Full Name")
+            email = st.text_input("Email")
+            password = st.text_input("Password", type="password")
+
+            if st.button("Create Account"):
+                if add_user(name, email, password):
+                    st.success("Account Created. Login Now.")
+                    st.session_state.auth_mode = "login"
+                    st.rerun()
+                else:
+                    st.warning("User already exists")
+
+            if st.button("Back to Login"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
+
+    st.stop()
 st_autorefresh(interval=100000, key="datarefresh")
 
 if "engine" not in st.session_state:
@@ -47,6 +163,9 @@ if "engine" not in st.session_state:
 engine = st.session_state.engine
 
 with st.sidebar:
+    if st.button("🔓 Logout"):
+        st.session_state.logged_in = False
+        st.rerun()
     st.markdown("""
         <div style='text-align: center; padding: 10px; border: 1px double #00f2ff; border-radius: 10px; background: rgba(0,242,255,0.05);'>
             <h1 style='color: #00f2ff; text-shadow: 0 0 20px #00f2ff; margin-bottom: 0; font-size: 25px;'>AEGIS-CAN</h1>
@@ -155,7 +274,7 @@ if tab == "Live Telemetry":
     st.markdown('</div>', unsafe_allow_html=True)
 
 elif tab == "Security Center":
-    st.markdown('<h2 class="section-title">VULNERABILITY LAB & THREAT VECTOR</h2>', unsafe_allow_html=True)
+    st.markdown('<h2 class="section-title">Adversarial Simulation & Analytics Suite</h2>', unsafe_allow_html=True)
     
     c1, c2, c3 = st.columns(3)
     with c1: 
@@ -196,30 +315,49 @@ elif tab == "Security Center":
         """, unsafe_allow_html=True)
 
 elif tab == "Analytics":
+
     st.markdown('<h2 class="section-title">ADVANCED ANALYTICS KERNEL</h2>', unsafe_allow_html=True)
 
-    if os.path.exists("data/latency_analysis.csv"):
-        df = pd.read_csv("data/latency_analysis.csv")
+    file_path = "data/latency_analysis.csv"
+
+    if os.path.exists(file_path):
+        df = pd.read_csv(file_path)
+
+        # Ensure datetime conversion
+        if 'Timestamp' in df.columns:
+            df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+        else:
+            st.error("Timestamp column missing in CSV")
+            st.stop()
+
     else:
         rows = 50
         df = pd.DataFrame({
-            'Timestamp': pd.date_range(start=datetime.now(), periods=rows, freq='S'),
+            'Timestamp': pd.date_range(start=datetime.now(), periods=rows, freq='s'),
             'Latency (ms)': np.random.normal(25, 5, size=rows),
             'Packet Stability (%)': np.random.uniform(94, 99.9, size=rows),
             'Threat Probability (%)': np.random.uniform(0.1, 2.5, size=rows),
             'Engine Temp': np.random.uniform(60, 85, size=rows)
         })
 
+    # Sort by time
+    df = df.sort_values("Timestamp")
+
+    # Set index once
+    df.set_index("Timestamp", inplace=True)
+
     g1, g2 = st.columns(2)
+
     with g1:
         st.caption("SIGNAL LATENCY SPECTRUM")
-        st.area_chart(df.set_index('Timestamp')['Latency (ms)'], color="#00f2ff")
+        st.area_chart(df["Latency (ms)"])
+
     with g2:
         st.caption("PACKET INTEGRITY (REAL-TIME)")
-        st.line_chart(df.set_index('Timestamp')['Packet Stability (%)'], color="#7000ff")
+        st.line_chart(df["Packet Stability (%)"])
 
     st.markdown("### Data Kernel Records")
-    st.dataframe(df.sort_values(by='Timestamp', ascending=False).head(15), use_container_width=True)
+    st.dataframe(df.tail(15), use_container_width=True)
 
 elif tab == "System Monitor":
     st.markdown('<h2 class="section-title">THREAD ARCHITECTURE</h2>', unsafe_allow_html=True)
