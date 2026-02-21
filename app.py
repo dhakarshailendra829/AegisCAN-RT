@@ -161,7 +161,7 @@ if "engine" not in st.session_state:
 engine = st.session_state.engine
 
 with st.sidebar:
-    if st.button("🔓 Logout"):
+    if st.button("Logout"):
         st.session_state.logged_in = False
         st.rerun()
     st.markdown("""
@@ -321,7 +321,6 @@ elif tab == "Analytics":
     if os.path.exists(file_path):
         df = pd.read_csv(file_path)
 
-        # Ensure datetime conversion
         if 'Timestamp' in df.columns:
             df['Timestamp'] = pd.to_datetime(df['Timestamp'])
         else:
@@ -338,10 +337,8 @@ elif tab == "Analytics":
             'Engine Temp': np.random.uniform(60, 85, size=rows)
         })
 
-    # Sort by time
     df = df.sort_values("Timestamp")
 
-    # Set index once
     df.set_index("Timestamp", inplace=True)
 
     g1, g2 = st.columns(2)
