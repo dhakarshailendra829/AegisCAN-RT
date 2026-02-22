@@ -10,9 +10,9 @@ We actively maintain and provide security updates only for the latest stable rel
 
 | Version      | Supported |
 |--------------|-----------|
-| Latest (master branch) v3.0.1| Yes |
+| Latest (master branch) v3.0.2 | Yes |
 | Previous minor release | Limited |
-| Older releases v3.0.0 | No |
+| Older releases v3.0.1 | No |
 
 ### Versioning Policy
 
