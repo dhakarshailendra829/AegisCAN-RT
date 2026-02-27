@@ -1,23 +1,15 @@
-# core/logger_engine.py
 import logging
 import logging.config
 import os
 from pathlib import Path
-from backend.config import settings  # ← import from backend
+from backend.config import settings  
 
 class LoggerEngine:
-    """Centralized logger setup with file + console output.
-    
-    Uses settings.LOG_LEVEL and creates data/ folder if needed.
-    Ready for structured/JSON logging upgrade.
-    """
-
     def __init__(self, log_file: str = "data/system.log"):
         self.log_file = Path(log_file)
         self._configure()
 
     def _configure(self):
-        """Configure logging with console + file handlers."""
         log_dir = self.log_file.parent
         log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -29,7 +21,6 @@ class LoggerEngine:
                     "format": "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
                     "datefmt": "%Y-%m-%d %H:%M:%S",
                 },
-                # Future: add "json" formatter with python-json-logger or structlog
             },
             "handlers": {
                 "console": {
@@ -43,7 +34,7 @@ class LoggerEngine:
                     "level": "DEBUG",
                     "formatter": "standard",
                     "filename": str(self.log_file),
-                    "maxBytes": 10 * 1024 * 1024,  # 10 MB
+                    "maxBytes": 10 * 1024 * 1024,  
                     "backupCount": 5,
                 },
             },
@@ -56,7 +47,6 @@ class LoggerEngine:
         logging.config.dictConfig(logging_config)
         self.logger = logging.getLogger("aegiscan")
 
-    # Convenience methods
     def debug(self, msg: str, extra: dict | None = None):
         self.logger.debug(msg, extra=extra)
 
@@ -72,6 +62,5 @@ class LoggerEngine:
     def critical(self, msg: str, extra: dict | None = None):
         self.logger.critical(msg, extra=extra)
 
-# Global instance
 logger_engine = LoggerEngine()
-logger = logger_engine.logger  # ← most common usage: from core.logger_engine import logger
+logger = logger_engine.logger  
