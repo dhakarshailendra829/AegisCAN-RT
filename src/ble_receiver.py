@@ -14,8 +14,6 @@ UDP_PORT = 5005
 
 
 class BLEReceiver:
-    """Simulated BLE receiver that generates steering data and forwards via UDP."""
-
     def __init__(self, event_bus=event_bus, max_queue_size: int = 500):
         self.event_bus = event_bus
         self.queue = PriorityQueue(maxsize=max_queue_size)
@@ -25,12 +23,10 @@ class BLEReceiver:
         self._sock: socket.socket | None = None
 
     def create_packet(self, data: bytes, priority: int = 1) -> tuple[int, int, bytes]:
-        """Create prioritized packet with microsecond timestamp."""
         ts_us = int(asyncio.get_running_loop().time() * 1_000_000)
         return priority, ts_us, data
 
     async def _udp_forward_loop(self):
-        """Forward queued packets over UDP (non-blocking)."""
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
             while self.running:
@@ -48,13 +44,13 @@ class BLEReceiver:
                         "data_len": len(data)
                     })
                 except (asyncio.TimeoutError, Empty):
-                    continue  # normal idle state - no log
+                    continue  
                 except Full:
                     logger.warning("Queue full - cannot forward")
                     await asyncio.sleep(0.01)
                 except Exception as e:
                     logger.error(f"UDP forward error: {e}", exc_info=True)
-                    await asyncio.sleep(0.5)  # prevent tight loop on real error
+                    await asyncio.sleep(0.5)  
         finally:
             if self._sock:
                 self._sock.close()
@@ -62,7 +58,6 @@ class BLEReceiver:
             logger.info("UDP forward loop ended")
 
     async def simulate(self):
-        """Generate simulated BLE steering data."""
         steering_center = 127
         while self.running:
             try:
@@ -70,7 +65,7 @@ class BLEReceiver:
                 steering_val = max(0, min(255, steering_val))
                 data = bytes([steering_val])
 
-                packet = self.create_packet(data, priority=0)  # high priority
+                packet = self.create_packet(data, priority=0)  
 
                 self.queue.put_nowait(packet)
                 await self.event_bus.publish("ble.rx", {
@@ -82,7 +77,7 @@ class BLEReceiver:
                 logger.warning("BLE queue full - dropping packet")
             except Exception as e:
                 logger.error(f"BLE simulation error: {e}", exc_info=True)
-            await asyncio.sleep(0.02)  # ~50 Hz
+            await asyncio.sleep(0.02)  
 
     async def start(self):
         if self.running:
@@ -90,7 +85,7 @@ class BLEReceiver:
             return
 
         self.running = True
-        logger.info("Starting BLEReceiver (simulated mode)")
+        logger.info("Starting BLEReceiver")
 
         self._udp_task = asyncio.create_task(self._udp_forward_loop())
         self._simulate_task = asyncio.create_task(self.simulate())
