@@ -1,4 +1,3 @@
-# tests/test_gateway.py
 import pytest
 import asyncio
 from src.gateway import Gateway

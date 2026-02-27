@@ -1,4 +1,3 @@
-# tests/test_security.py
 import pytest
 from src.attack_engine import AttackEngine
 
@@ -31,6 +30,6 @@ async def test_dos_attack_publishes_multiple():
         published_count += 1
 
     attack.bus.subscribe("attack.event", mock_handler)
-    await attack.dos_attack(duration_sec=0.1, rate_hz=50)  # short test
+    await attack.dos_attack(duration_sec=0.1, rate_hz=50)  
 
-    assert published_count > 2  # at least a few events
+    assert published_count > 2  

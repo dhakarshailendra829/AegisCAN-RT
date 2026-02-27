@@ -1,4 +1,3 @@
-# tests/test_pipeline.py
 import pytest
 from src.can_translator import CANTranslator
 
