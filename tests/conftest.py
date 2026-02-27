@@ -1,4 +1,3 @@
-# tests/conftest.py
 import pytest
 from src.gateway import Gateway
 from core.event_bus import event_bus
