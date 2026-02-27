@@ -1,20 +1,15 @@
-# src/can_translator.py
 import asyncio
 import time
 import socket
 import struct
 from queue import PriorityQueue, Empty
-
 import can
-
 from core.logger_engine import logger
 from core.event_bus import event_bus
 from core.task_manager import task_manager
 
 
 class CANTranslator:
-    """Translates BLE/UDP packets to CAN messages with attack simulation support."""
-
     def __init__(self, event_bus=event_bus, attack_mode: str | None = None):
         self.event_bus = event_bus
         self.queue = PriorityQueue(maxsize=500)
@@ -25,24 +20,21 @@ class CANTranslator:
         self._process_task: asyncio.Task | None = None
 
     def scale_steering(self, raw: int) -> int:
-        """Scale BLE 0-255 value to CAN steering angle range (-900 to +900)."""
         return int((raw - 127) * (900 / 255))
 
     def _setup_can_bus(self):
-        """Initialize virtual or socketcan bus."""
         try:
             self.can_bus = can.interface.Bus(interface='virtual', channel='vcan0', receive_own_messages=True)
-            logger.info("CAN bus initialized: virtual (vcan0)")
+            logger.info("CAN bus initialized: virtual")
         except Exception:
             try:
                 self.can_bus = can.interface.Bus(interface='socketcan', channel='vcan0')
-                logger.info("CAN bus initialized: socketcan (vcan0)")
+                logger.info("CAN bus initialized: socketcan")
             except Exception as e:
                 logger.error(f"Failed to initialize CAN bus: {e}", exc_info=True)
                 raise
 
     async def _udp_receiver_loop(self):
-        """Async UDP listener for incoming BLE packets."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("127.0.0.1", 5005))
@@ -69,18 +61,16 @@ class CANTranslator:
             logger.info("UDP receiver loop ended")
 
     def process_packet(self, item: tuple[int, int, bytes]):
-        """Process one packet: apply attack → send CAN message."""
         priority, ts_us, ble_data = item
         raw = ble_data[0] if ble_data else 127
         steering_angle = self.scale_steering(raw)
 
-        # Apply active attack
         if self.attack_mode == "flip":
             steering_angle = -steering_angle
         elif self.attack_mode == "dos":
-            time.sleep(0.05)  # simulated delay
+            time.sleep(0.05)  
         elif self.attack_mode == "heart":
-            return  # drop heartbeat-like message
+            return  
 
         can_data = struct.pack('<h', steering_angle)
         msg = can.Message(arbitration_id=0x100, data=can_data, is_extended_id=False)
@@ -102,7 +92,6 @@ class CANTranslator:
             logger.error(f"CAN send failed: {e}", exc_info=True)
 
     async def _process_loop(self):
-        """Async packet processing loop."""
         while self.running:
             try:
                 packet = await asyncio.wait_for(
@@ -111,7 +100,7 @@ class CANTranslator:
                 )
                 self.process_packet(packet)
             except (asyncio.TimeoutError, Empty):
-                await asyncio.sleep(0.005)  # silent idle
+                await asyncio.sleep(0.005)  
             except Exception as e:
                 logger.error(f"Packet processing error: {e}", exc_info=True)
                 await asyncio.sleep(0.5)
