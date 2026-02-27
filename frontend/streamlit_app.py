@@ -1,4 +1,3 @@
-# frontend/streamlit_app.py
 import streamlit as st
 import requests
 import pandas as pd
@@ -11,11 +10,8 @@ import time
 from torch import mode
 from streamlit_autorefresh import st_autorefresh
 import numpy as np
-import matplotlib.pyplot as plt  # Added for background_gradient support
+import matplotlib.pyplot as plt  
 
-# ────────────────────────────────────────────────
-# CONFIG & CONSTANTS
-# ────────────────────────────────────────────────
 API_BASE = "http://localhost:8000"
 HEADERS = {"Content-Type": "application/json"}
 
@@ -46,9 +42,6 @@ if "logged_in" not in st.session_state:
 if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "login"
 
-# ────────────────────────────────────────────────
-# ADVANCED STYLING (revised for balance - less colorful, more professional)
-# ────────────────────────────────────────────────
 st.set_page_config(page_title="AEGIS-CAN COMMAND CENTER", layout="wide", initial_sidebar_state="expanded")
 
 def load_css():
@@ -60,14 +53,11 @@ def load_css():
 
 load_css()
 
-# ────────────────────────────────────────────────
-# AUTHENTICATION (revised for clean look)
-# ────────────────────────────────────────────────
 if not st.session_state.logged_in:
     st.markdown("""
     <div style="display: flex; height: 90vh; align-items: center; justify-content: center; background: linear-gradient(135deg, #0a001f, #1a0033);">
         <div style="width: 450px; padding: 60px; background: rgba(20,0,40,0.85); border-radius: 24px; border: 1px solid rgba(0,255,255,0.3); backdrop-filter: blur(12px); box-shadow: 0 0 50px rgba(0,255,255,0.2); text-align: center;">
-            <h1 style="font-size: 3.5rem; color: #00faff; margin-bottom: 30px; text-shadow: 0 0 15px #00faff;">AEGIS-CAN</h1>
+            <h1 style="font-size: 3.5rem; color: #00faff; margin-bottom: 30px; text-shadow: 0 0 15px #00faff;">AEGIS-CAN RT System</h1>
     """, unsafe_allow_html=True)
 
     if st.session_state.auth_mode == "login":
@@ -100,9 +90,6 @@ if not st.session_state.logged_in:
     st.markdown("</div></div>", unsafe_allow_html=True)
     st.stop()
 
-# ────────────────────────────────────────────────
-# MAIN DASHBOARD (revised for clean, professional layout)
-# ────────────────────────────────────────────────
 st_autorefresh(interval=5000, key="autorefresh")
 
 now = datetime.now()
@@ -162,15 +149,11 @@ with st.sidebar:
 
 if st.button("EXECUTE VECTOR", type="primary", use_container_width=True):
     execute_attack()
-# Similar for other tabs...
-
+    
 st.markdown(f"<div style='text-align:center; padding:20px; color:#00ff9d;'>Sync: {now_str} | Secured</div>", unsafe_allow_html=True)
-# ────────────────────────────────────────────────
-# MAIN TABS – REAL SAAS DASHBOARD FEEL
-# ────────────────────────────────────────────────
+
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["LIVE TELEMETRY", "SECURITY CENTER", "ANALYTICS CORE", "SYSTEM MONITOR", "KERNEL LOGS"])
 
-# ─── LIVE TELEMETRY ────────────────────────────────────────────────
 with tab1:
     st.subheader("SIGNAL LATENCY & PACKET FLOW")
     try:
@@ -180,14 +163,12 @@ with tab1:
             if 'timestamp' in df.columns:
                 df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-                # Main animated line chart
                 fig_line = px.line(df, x="timestamp", y="latency_us", color="type",
                                   title="Real-Time Latency Oscilloscope (µs)",
                                   template="plotly_dark", height=450)
                 fig_line.update_traces(line=dict(width=2.5))
                 st.plotly_chart(fig_line, use_container_width=True)
 
-                # Gauge for current average latency
                 avg_latency = df["latency_us"].mean() / 1000
                 fig_gauge = go.Figure(go.Indicator(
                     mode="gauge+number+delta",
@@ -216,7 +197,6 @@ with tab1:
     except Exception as e:
         st.error(f"Telemetry fetch failed: {str(e)}")
 
-# ─── SECURITY CENTER ──────────────────────────────────────────────
 with tab2:
     st.subheader("THREAT DETECTION & ADVERSARIAL SIMULATION")
 
@@ -242,7 +222,6 @@ with tab2:
         st.markdown("<div class='threat-meter'><h2 style='color:white; font-size:3rem;'>RISK</h2><p style='font-size:1.4rem; color:#ff0055;'>CRITICAL</p></div>", unsafe_allow_html=True)
         st.markdown("<p style='text-align:center; color:#ffccdd; margin-top:20px;'>THREAT LEVEL</p>", unsafe_allow_html=True)
 
-# ─── ANALYTICS CORE ───────────────────────────────────────────────
 with tab3:
     st.subheader("AI-DRIVEN ANALYTICS & PREDICTION ENGINE")
     try:
@@ -269,7 +248,6 @@ with tab3:
     except:
         st.error("Analytics fetch failed")
 
-# ─── SYSTEM MONITOR ───────────────────────────────────────────────
 with tab4:
     st.subheader("SYSTEM ARCHITECTURE & RESOURCE MONITOR")
     try:
@@ -279,7 +257,6 @@ with tab4:
             color = "lime" if status == "healthy" else "red"
             st.markdown(f"<h2 style='color:{color}; text-shadow:0 0 15px {color};'>SYSTEM STATUS: {status.upper()}</h2>", unsafe_allow_html=True)
 
-        # Mock / real resource gauges (add endpoint later if needed)
         col1, col2, col3 = st.columns(3)
         with col1:
             fig_cpu = go.Figure(go.Indicator(mode="gauge+number", value=35, title={'text': "CPU"}, gauge={'axis': {'range': [0,100]}}))
@@ -299,7 +276,6 @@ with tab4:
     except:
         st.error("System monitor data unavailable")
 
-# ─── KERNEL LOGS ──────────────────────────────────────────────────
 with tab5:
     st.subheader("REAL-TIME KERNEL & EVENT LOG")
     try:
@@ -314,11 +290,8 @@ with tab5:
     except:
         st.error("Log stream unavailable")
 
-# ────────────────────────────────────────────────
-# FOOTER – FINAL TOUCH
-# ────────────────────────────────────────────────
 st.markdown(f"""
 <div class="footer">
-    CORE SYNC: {now_str} | AES-256-GCM ACTIVE | NODE: GLOBAL-CAN-01 | PLATFORM v3.2 | SECURED BY AEGIS
+    CORE SYNC: {now_str} | AES-256-GCM ACTIVE | NODE: GLOBAL-CAN-01 | PLATFORM v3.0.3 | SECURED BY AEGIS | Shailendra Dhakad *Backend Developer*
 </div>
 """, unsafe_allow_html=True)

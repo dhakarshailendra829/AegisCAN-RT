@@ -1,29 +1,24 @@
-# Core
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 python-dotenv>=1.0.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
 
-# Data / DB
 sqlalchemy>=2.0.0
-aiosqlite>=0.20.0          # async SQLite support
+aiosqlite>=0.20.0          
 
-# Your existing libs (add what you already use)
-streamlit>=1.30.0           # keep for now
+streamlit>=1.30.0           
 pandas>=2.0.0
 numpy>=1.26.0
 scikit-learn>=1.5.0
 plotly>=5.20.0
 
-# Security & utils
-python-jose[cryptography]   # for JWT later
-passlib[bcrypt]             # password hashing
-python-multipart            # file uploads if needed
+python-jose[cryptography]   
+passlib[bcrypt]             
+python-multipart            
 
-# Dev & testing
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
-httpx>=0.27.0               # for testing APIs
+httpx>=0.27.0              
 black>=24.0.0
 ruff>=0.6.0
