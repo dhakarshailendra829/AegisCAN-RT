@@ -1,23 +1,36 @@
-import unittest
-from core.event_bus import EventBus
+# tests/test_security.py
+import pytest
 from src.attack_engine import AttackEngine
 
+@pytest.mark.asyncio
+async def test_attack_init():
+    attack = AttackEngine()
+    assert attack is not None
 
-class TestSecurity(unittest.TestCase):
+@pytest.mark.asyncio
+async def test_bit_flip_publishes_event():
+    attack = AttackEngine()
+    published = []
 
-    def setUp(self):
-        self.bus = EventBus()
-        self.attack = AttackEngine(self.bus)
+    async def mock_handler(data):
+        published.append(data)
 
-    def test_attack_init(self):
-        self.assertIsNotNone(self.attack)
+    attack.bus.subscribe("attack.event", mock_handler)
+    await attack.bit_flip()
 
-    def test_bit_flip(self):
-        self.attack.bit_flip()
+    assert len(published) == 1
+    assert published[0]["type"] == "BIT_FLIP"
 
-    def test_heartbeat_drop(self):
-        self.attack.heartbeat_drop()
+@pytest.mark.asyncio
+async def test_dos_attack_publishes_multiple():
+    attack = AttackEngine()
+    published_count = 0
 
+    async def mock_handler(_):
+        nonlocal published_count
+        published_count += 1
 
-if __name__ == "__main__":
-    unittest.main()
+    attack.bus.subscribe("attack.event", mock_handler)
+    await attack.dos_attack(duration_sec=0.1, rate_hz=50)  # short test
+
+    assert published_count > 2  # at least a few events

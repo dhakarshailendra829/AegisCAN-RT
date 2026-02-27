@@ -1,26 +1,30 @@
-import unittest
-from src.master_gateway import GatewayEngine
+# tests/test_gateway.py
+import pytest
+import asyncio
+from src.gateway import Gateway
 
+@pytest.mark.asyncio
+async def test_gateway_init(gateway):
+    assert gateway.running is False
+    assert gateway.ble is not None
+    assert gateway.can is not None
+    assert gateway.attack is not None
+    assert len(gateway.telemetry) == 0
 
-class TestGatewayEngine(unittest.TestCase):
+@pytest.mark.asyncio
+async def test_gateway_start_stop(gateway):
+    assert gateway.running is False
 
-    def setUp(self):
-        self.engine = GatewayEngine()
+    await gateway.start()
+    assert gateway.running is True
 
-    def test_engine_init(self):
-        self.assertIsNotNone(self.engine.bus)
-        self.assertIsNotNone(self.engine.ble)
-        self.assertIsNotNone(self.engine.can)
-        self.assertEqual(self.engine.threads, [])
+    await gateway.stop()
+    assert gateway.running is False
 
-    def test_start(self):
-        self.engine.start()
-        self.assertTrue(len(self.engine.threads) > 0)
+@pytest.mark.asyncio
+async def test_gateway_attack_mode(gateway):
+    gateway.set_attack_mode("dos")
+    assert gateway.can.attack_mode == "dos"
 
-    def test_stop(self):
-        self.engine.stop()
-        self.assertFalse(self.engine.can.running)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    gateway.set_attack_mode(None)
+    assert gateway.can.attack_mode is None

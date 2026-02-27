@@ -1,28 +1,70 @@
+# src/attack_engine.py
+import asyncio
 import random
-import time
-from core.event_bus import EventBus
+
+from core.logger_engine import logger
+from core.event_bus import event_bus
+
+
 class AttackEngine:
+    """Cyber-attack simulation engine for DoS, bit-flip, and heartbeat drop scenarios."""
 
-    def __init__(self, event_bus: EventBus):
-        self.bus = event_bus
+    def __init__(self, event_bus=event_bus):
+        self.event_bus = event_bus
 
-    def dos_attack(self):
+    async def dos_attack(self, duration_sec: float = 2.0, rate_hz: float = 100.0):
+        """
+        Simulate Denial of Service by flooding attack events at high rate.
+        
+        Args:
+            duration_sec: How long to run the flood (seconds)
+            rate_hz: Target events per second
+        """
+        logger.warning(f"Starting DoS attack simulation: {duration_sec}s @ {rate_hz} Hz")
+        end_time = asyncio.get_running_loop().time() + duration_sec
+        interval = 1.0 / rate_hz if rate_hz > 0 else 0.1
 
-        for _ in range(200):
-            self.bus.publish("attack.event", {
-                "type":"DOS",
-                "severity":"HIGH"
+        count = 0
+        try:
+            while asyncio.get_running_loop().time() < end_time:
+                await self.event_bus.publish("attack.event", {
+                    "type": "DOS",
+                    "severity": "HIGH",
+                    "timestamp": asyncio.get_running_loop().time(),
+                    "simulated_rate_hz": rate_hz,
+                    "event_count": count + 1
+                })
+                count += 1
+                await asyncio.sleep(interval)
+        except asyncio.CancelledError:
+            logger.info("DoS attack cancelled")
+        except Exception as e:
+            logger.error(f"DoS attack failed: {e}", exc_info=True)
+        finally:
+            logger.info(f"DoS simulation ended after {count} events")
+
+    async def bit_flip(self):
+        """Simulate a single bit-flip attack event."""
+        try:
+            await self.event_bus.publish("attack.event", {
+                "type": "BIT_FLIP",
+                "severity": "MEDIUM",
+                "description": "Random bit flip injected in steering data",
+                "timestamp": asyncio.get_running_loop().time()
             })
-            time.sleep(0.01)
+            logger.warning("Bit-flip attack event published")
+        except Exception as e:
+            logger.error(f"Bit-flip attack publish failed: {e}", exc_info=True)
 
-    def bit_flip(self):
-
-        self.bus.publish("attack.event",{
-            "type":"BIT_FLIP"
-        })
-
-    def heartbeat_drop(self):
-
-        self.bus.publish("attack.event",{
-            "type":"HEARTBEAT_LOSS"
-        })
+    async def heartbeat_drop(self):
+        """Simulate heartbeat/keep-alive drop attack event."""
+        try:
+            await self.event_bus.publish("attack.event", {
+                "type": "HEARTBEAT_LOSS",
+                "severity": "CRITICAL",
+                "description": "Heartbeat messages dropped - potential node isolation",
+                "timestamp": asyncio.get_running_loop().time()
+            })
+            logger.warning("Heartbeat drop attack event published")
+        except Exception as e:
+            logger.error(f"Heartbeat drop attack publish failed: {e}", exc_info=True)

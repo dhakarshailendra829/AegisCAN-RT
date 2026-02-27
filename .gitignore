@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Data & sensitive
+data/*.csv
+data/*.log
+models/*.pkl
+models/*.h5
+models/*.pt
+.env
+config/secrets.yaml
+users.csv
+telemetry_log.csv
+
+# IDE / Editor
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Testing & coverage
+.coverage
+htmlcov/
+coverage.xml
+.pytest_cache/
+
+# Docker & build
+*.dockerignore
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# macOS / Windows junk
+.DS_Store
+Thumbs.db
+
+# Node (if you add React later)
+frontend/react/node_modules/
