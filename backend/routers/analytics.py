@@ -1,11 +1,9 @@
-# backend/routers/analytics.py
 from fastapi import APIRouter, Query, HTTPException
 import sqlite3
 import json
 from backend.config import settings
 
 router = APIRouter()
-
 
 @router.get("/telemetry")
 async def get_telemetry(limit: int = Query(200, ge=1, le=1000)):

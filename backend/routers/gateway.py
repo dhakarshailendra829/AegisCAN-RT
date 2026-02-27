@@ -1,12 +1,8 @@
-# backend/routers/gateway.py
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-
 from src.gateway import Gateway
 
 router = APIRouter()
-
-# Single global instance
 gateway = Gateway()
 
 class StatusResponse(BaseModel):
@@ -51,7 +47,7 @@ async def stop_gateway():
         raise HTTPException(status_code=500, detail=f"Stop failed: {str(e)}")
 
 @router.post("/attack/{mode}")
-async def trigger_attack(mode: str | None = None):  # Allow None
+async def trigger_attack(mode: str | None = None):  
     if mode is None or mode.lower() == "none":
         gateway.set_attack_mode(None)
         return {"status": "success", "message": "Attack mode deactivated"}
