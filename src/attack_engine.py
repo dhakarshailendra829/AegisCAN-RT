@@ -1,25 +1,14 @@
-# src/attack_engine.py
 import asyncio
 import random
-
 from core.logger_engine import logger
 from core.event_bus import event_bus
 
 
 class AttackEngine:
-    """Cyber-attack simulation engine for DoS, bit-flip, and heartbeat drop scenarios."""
-
     def __init__(self, event_bus=event_bus):
         self.event_bus = event_bus
 
     async def dos_attack(self, duration_sec: float = 2.0, rate_hz: float = 100.0):
-        """
-        Simulate Denial of Service by flooding attack events at high rate.
-        
-        Args:
-            duration_sec: How long to run the flood (seconds)
-            rate_hz: Target events per second
-        """
         logger.warning(f"Starting DoS attack simulation: {duration_sec}s @ {rate_hz} Hz")
         end_time = asyncio.get_running_loop().time() + duration_sec
         interval = 1.0 / rate_hz if rate_hz > 0 else 0.1
@@ -44,7 +33,6 @@ class AttackEngine:
             logger.info(f"DoS simulation ended after {count} events")
 
     async def bit_flip(self):
-        """Simulate a single bit-flip attack event."""
         try:
             await self.event_bus.publish("attack.event", {
                 "type": "BIT_FLIP",
@@ -57,7 +45,6 @@ class AttackEngine:
             logger.error(f"Bit-flip attack publish failed: {e}", exc_info=True)
 
     async def heartbeat_drop(self):
-        """Simulate heartbeat/keep-alive drop attack event."""
         try:
             await self.event_bus.publish("attack.event", {
                 "type": "HEARTBEAT_LOSS",
