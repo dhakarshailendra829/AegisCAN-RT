@@ -1,4 +1,3 @@
-# src/ble_receiver.py
 import asyncio
 import socket
 import struct
