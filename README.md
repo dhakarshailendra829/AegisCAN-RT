@@ -183,7 +183,11 @@ git clone https://github.com/dhakarshailendra829/AegisCAN-RT.git
 cd AegisCAN-RT
 pip install -r requirements.txt
 ```
-
+## Start Backend
+```bash
+uvicorn backend.main:app --reload --port 8000
+```
+## Test the backend and API 
 ---
 
 ## ▶️ Run the System
