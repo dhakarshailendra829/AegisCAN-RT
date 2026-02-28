@@ -14,7 +14,7 @@
 
 ---
 
-## 🚀 Overview
+## Overview
 
 **AegisCAN-RT** is a production-grade deterministic real-time gateway engineered for safety-critical automotive and industrial control systems.
 
@@ -32,7 +32,7 @@ Unlike conventional IoT bridges optimized for throughput, AegisCAN-RT prioritize
 
 ---
 
-## 🎯 Engineering Objectives
+## Engineering Objectives
 
 - Deterministic BLE → CAN message delivery (~1ms latency)  
 - Priority-aware scheduling for control-critical frames  
@@ -42,7 +42,7 @@ Unlike conventional IoT bridges optimized for throughput, AegisCAN-RT prioritize
 
 ---
 
-## 🧠 System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -81,7 +81,7 @@ flowchart TD
 
 ---
 
-## ⚙️ Core Engineering Capabilities
+## Core Engineering Capabilities
 
 ### 🔹 Deterministic Gateway Core
 - Event-driven modular architecture  
@@ -97,8 +97,7 @@ flowchart TD
 - Signal jitter visualization (Plotly oscilloscope)  
 
 ### 🔹 Cyber-Attack Simulation Engine
-
-Built-in controlled research lab supporting:
+  Built-in controlled research lab supporting:
 
 - DoS (Traffic Flooding)  
 - Bit-Flip Injection  
@@ -110,7 +109,7 @@ Built-in controlled research lab supporting:
 
 ---
 
-## 📊 Deterministic Engineering Comparison
+## Deterministic Engineering Comparison
 
 | Dimension | Conventional Gateway | AegisCAN-RT |
 |------------|----------------------|--------------|
@@ -154,7 +153,7 @@ Built-in controlled research lab supporting:
 
 ---
 
-## 🔐 Safety & Security Design Principles
+## Safety & Security Design Principles
 
 - ISO 26262-aligned architectural mindset  
 - Fail-safe state transitions  
@@ -164,7 +163,7 @@ Built-in controlled research lab supporting:
 
 ---
 
-## 📡 Research Applications
+## Research Applications
 
 - Steer-by-Wire simulation  
 - Brake-by-Wire modeling  
@@ -176,7 +175,7 @@ Built-in controlled research lab supporting:
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 git clone https://github.com/dhakarshailendra829/AegisCAN-RT.git
@@ -188,25 +187,22 @@ pip install -r requirements.txt
 uvicorn backend.main:app --reload --port 8000
 ```
 ## Test the backend and API 
+```bash
+1. Open http://localhost:8000/docs
+2. http://127.0.0.1:8000/redoc
+```
 ---
 
-## ▶️ Run the System
+## Run the System
 
 ### Start Streamlit Dashboard
 
 ```bash
-streamlit run app.py
+streamlit run frontend/streamlit_app.py
 ```
-
-### Start FastAPI Backend
-
-```bash
-uvicorn src.main:app --reload
-```
-
 ---
 
-## 📈 Version History
+## Version History
 
 ### v3.0.2
 - Performance optimizations  
@@ -227,7 +223,8 @@ uvicorn src.main:app --reload
 Embedded Systems Engineer • Automotive Cybersecurity • Real-Time Systems Architect  
 
 🔗 GitHub: https://github.com/dhakarshailendra829  
-🔗 LinkedIn: https://www.linkedin.com/in/shailendra-dhakad-063a98292/  
+🔗 LinkedIn: https://www.linkedin.com/in/shailendra-dhakad-063a98292/
+🔗 X: https://x.com/Engineer221131
 
 ---
 
@@ -237,7 +234,7 @@ Embedded Systems Engineer • Automotive Cybersecurity • Real-Time Systems Arc
 - Backend engineering roles in safety-critical systems  
 - Embedded systems R&D  
 - Technical writing & documentation  
-
+- Backend Development
 ---
 
 > *Building deterministic, secure, safety-critical automotive systems for the next generation of intelligent mobility.*
