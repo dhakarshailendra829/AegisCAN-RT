@@ -94,7 +94,7 @@ flowchart TD
 - Continuous latency measurement  
 - Queue depth monitoring  
 - Throughput analysis  
-- Signal jitter visualization (Plotly oscilloscope)  
+- Signal jitter visualization 
 
 ### 🔹 Cyber-Attack Simulation Engine
   Built-in controlled research lab supporting:
