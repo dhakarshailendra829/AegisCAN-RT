@@ -223,7 +223,7 @@ streamlit run frontend/streamlit_app.py
 ## 👤 Author
 
 **Shailendra Dhakad**  
-Backend Development | Embedded Systems Engineer | Automotive Cybersecurity | Real-Time Systems Architect  
+Backend Development | Embedded Systems Engineer | Automotive Cybersecurity | Researcher  
 
 🔗 GitHub: https://github.com/dhakarshailendra829  
 🔗 LinkedIn: https://www.linkedin.com/in/shailendra-dhakad-063a98292/
