@@ -11,19 +11,12 @@ from enum import Enum
 from typing import Optional
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
-
 from src.gateway import Gateway
 
-# Initialize logger
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 gateway = Gateway()
-
-
-# ============================================================================
-# Enums for Type Safety
-# ============================================================================
 
 class AttackMode(str, Enum):
     """Valid attack modes for the gateway."""
@@ -31,11 +24,6 @@ class AttackMode(str, Enum):
     BIT_FLIP = "flip"
     HEARTBEAT_DROP = "heart"
     NONE = "none"
-
-
-# ============================================================================
-# Pydantic Response Models
-# ============================================================================
 
 class StatusResponse(BaseModel):
     """Standard response model for gateway status operations."""
@@ -47,7 +35,6 @@ class StatusResponse(BaseModel):
             "example": {"status": "active", "message": "BLE-CAN gateway ready"}
         }
 
-
 class AttackResponse(BaseModel):
     """Response model for attack operations."""
     status: str = Field(..., description="Operation status (success/error)")
@@ -58,7 +45,6 @@ class AttackResponse(BaseModel):
         json_schema_extra = {
             "example": {"status": "success", "message": "Attack mode 'dos' activated", "mode": "dos"}
         }
-
 
 class HealthResponse(BaseModel):
     """Detailed gateway health and status information."""
@@ -78,11 +64,6 @@ class HealthResponse(BaseModel):
                 "telemetry_count": 42
             }
         }
-
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
 
 @router.get("/status", response_model=StatusResponse)
 async def gateway_status():
@@ -104,7 +85,6 @@ async def gateway_status():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve gateway status"
         )
-
 
 @router.get("/health", response_model=HealthResponse)
 async def gateway_health():
@@ -232,7 +212,6 @@ async def trigger_attack(mode: str | None = None):
         HTTPException 500: If attack mode activation fails
     """
     try:
-        # Normalize and validate mode
         mode_lower = mode.lower() if mode else ""
         valid_modes = [e.value for e in AttackMode]
 
@@ -243,7 +222,6 @@ async def trigger_attack(mode: str | None = None):
                 detail=f"Invalid mode. Allowed: {', '.join([m for m in valid_modes if m != 'none'])}, or 'none'"
             )
 
-        # Deactivate if mode is 'none'
         if mode_lower == AttackMode.NONE.value:
             logger.info("Deactivating attack mode")
             gateway.set_attack_mode(None)
@@ -253,7 +231,6 @@ async def trigger_attack(mode: str | None = None):
                 "mode": None
             }
 
-        # Activate attack mode
         logger.warning(f"Activating attack mode: {mode_lower}")
         gateway.set_attack_mode(mode_lower)
 
@@ -264,7 +241,7 @@ async def trigger_attack(mode: str | None = None):
         }
 
     except HTTPException:
-        raise  # Re-raise HTTP exceptions
+        raise  
 
     except Exception as e:
         logger.error(f"Failed to set attack mode '{mode}': {e}", exc_info=True)
@@ -272,7 +249,6 @@ async def trigger_attack(mode: str | None = None):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to activate attack mode: {str(e)}"
         )
-
 
 @router.post("/reset", response_model=StatusResponse)
 async def reset_gateway():
@@ -294,7 +270,6 @@ async def reset_gateway():
         if is_running:
             await gateway.stop()
 
-        # Reset attack mode
         gateway.set_attack_mode(None)
 
         logger.info("Gateway reset successfully")
