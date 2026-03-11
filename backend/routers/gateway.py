@@ -19,14 +19,12 @@ router = APIRouter()
 gateway = Gateway()
 
 class AttackMode(str, Enum):
-    """Valid attack modes for the gateway."""
     DOS = "dos"
     BIT_FLIP = "flip"
     HEARTBEAT_DROP = "heart"
     NONE = "none"
 
 class StatusResponse(BaseModel):
-    """Standard response model for gateway status operations."""
     status: str = Field(..., description="Operation status")
     message: str = Field(..., description="Human-readable status message")
 
@@ -36,7 +34,6 @@ class StatusResponse(BaseModel):
         }
 
 class AttackResponse(BaseModel):
-    """Response model for attack operations."""
     status: str = Field(..., description="Operation status (success/error)")
     message: str = Field(..., description="Operation details")
     mode: Optional[str] = Field(None, description="Active attack mode or None")
@@ -47,7 +44,6 @@ class AttackResponse(BaseModel):
         }
 
 class HealthResponse(BaseModel):
-    """Detailed gateway health and status information."""
     is_running: bool = Field(..., description="Whether gateway is currently running")
     status: str = Field(..., description="Current operational status")
     message: str = Field(..., description="Descriptive status message")
@@ -67,12 +63,6 @@ class HealthResponse(BaseModel):
 
 @router.get("/status", response_model=StatusResponse)
 async def gateway_status():
-    """
-    Get the current status of the BLE-CAN gateway.
-
-    Returns:
-        StatusResponse: Current gateway status (active/inactive)
-    """
     try:
         is_running = getattr(gateway, "running", False)
         return StatusResponse(
@@ -88,12 +78,6 @@ async def gateway_status():
 
 @router.get("/health", response_model=HealthResponse)
 async def gateway_health():
-    """
-    Get detailed health information about the gateway including telemetry buffer status.
-
-    Returns:
-        HealthResponse: Comprehensive gateway health information
-    """
     try:
         is_running = getattr(gateway, "running", False)
         attack_mode = getattr(gateway.can, "attack_mode", None) if hasattr(gateway, "can") else None
@@ -116,15 +100,6 @@ async def gateway_health():
 
 @router.post("/start", response_model=StatusResponse)
 async def start_gateway():
-    """
-    Start the BLE-CAN gateway and initialize all components.
-
-    Returns:
-        StatusResponse: Startup status and message
-
-    Raises:
-        HTTPException: If gateway is already running or startup fails
-    """
     try:
         is_running = getattr(gateway, "running", False)
 
@@ -154,15 +129,6 @@ async def start_gateway():
 
 @router.post("/stop", response_model=StatusResponse)
 async def stop_gateway():
-    """
-    Gracefully stop the BLE-CAN gateway and cleanup resources.
-
-    Returns:
-        StatusResponse: Shutdown status and message
-
-    Raises:
-        HTTPException: If gateway is not running or shutdown fails
-    """
     try:
         is_running = getattr(gateway, "running", False)
 
@@ -192,25 +158,6 @@ async def stop_gateway():
 
 @router.post("/attack/{mode}")
 async def trigger_attack(mode: str | None = None):
-    """
-    Activate or deactivate attack simulation modes on the gateway.
-
-    Attack Modes:
-    - **dos**: Denial of Service attack simulation
-    - **flip**: Bit flip attack simulation
-    - **heart**: Heartbeat drop attack simulation
-    - **none**: Deactivate all attacks
-
-    Args:
-        mode: Attack mode name (dos, flip, heart, or none)
-
-    Returns:
-        dict: Confirmation of attack mode change with status and message
-
-    Raises:
-        HTTPException 422: If mode is invalid
-        HTTPException 500: If attack mode activation fails
-    """
     try:
         mode_lower = mode.lower() if mode else ""
         valid_modes = [e.value for e in AttackMode]
@@ -252,17 +199,6 @@ async def trigger_attack(mode: str | None = None):
 
 @router.post("/reset", response_model=StatusResponse)
 async def reset_gateway():
-    """
-    Reset the gateway to its initial state.
-
-    This will:
-    - Stop the gateway if running
-    - Clear attack modes
-    - Preserve telemetry data
-
-    Returns:
-        StatusResponse: Reset status and message
-    """
     try:
         logger.info("Resetting gateway...")
 
