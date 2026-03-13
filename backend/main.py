@@ -1,9 +1,3 @@
-"""
-FastAPI application factory and configuration.
-
-Main entry point for the AegisCAN-RT backend.
-"""
-
 import logging
 from contextlib import asynccontextmanager
 
@@ -18,86 +12,55 @@ from core.logger_engine import logger as core_logger
 from core.metrics_engine import metrics_engine
 from src.gateway import Gateway
 
-# Configure logging
 logger = logging.getLogger(__name__)
 
-
-# Global gateway instance
 _gateway_instance: Gateway = None
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    FastAPI lifespan context manager for startup and shutdown events.
-
-    Startup:
-    - Create database tables
-    - Start metrics collection
-    - Initialize gateway
-
-    Shutdown:
-    - Stop metrics collection
-    - Stop gateway
-    - Clean up resources
-    """
-    # ========================================================================
-    # Startup Events
-    # ========================================================================
     try:
-        logger.info("🚀 Starting AegisCAN-RT Application")
+        logger.info("Starting AegisCAN-RT Application")
 
-        # Import here to avoid circular imports
         from sqlalchemy import text
 
-        # Test database connection
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
-            logger.info("✅ Database connection successful")
+            logger.info("Database connection successful")
 
-        # Create tables
         try:
-            from backend.models import Base  # Import after engine created
+            from backend.models import Base  
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
-                logger.info("✅ Database tables initialized")
+                logger.info("Database tables initialized")
         except ImportError:
-            logger.warning("⚠️ backend.models not found, skipping table creation")
+            logger.warning("backend.models not found, skipping table creation")
 
-        # Start metrics collection
         metrics_engine.start()
-        logger.info("✅ Metrics engine started")
+        logger.info("Metrics engine started")
 
-        logger.info("🎉 Application startup complete")
+        logger.info("Application startup complete")
 
         yield
 
     except Exception as e:
-        logger.error(f"❌ Startup failed: {e}", exc_info=True)
+        logger.error(f"Startup failed: {e}", exc_info=True)
         raise
 
     finally:
-        # ========================================================================
-        # Shutdown Events
-        # ========================================================================
         try:
-            logger.info("🛑 Shutting down AegisCAN-RT Application")
+            logger.info("Shutting down AegisCAN-RT Application")
 
-            # Stop metrics
             await metrics_engine.stop()
-            logger.info("✅ Metrics engine stopped")
+            logger.info("Metrics engine stopped")
 
-            # Dispose engine
             await engine.dispose()
-            logger.info("✅ Database connection closed")
+            logger.info("Database connection closed")
 
-            logger.info("✅ Graceful shutdown complete")
+            logger.info("Graceful shutdown complete")
 
         except Exception as e:
-            logger.error(f"❌ Shutdown error: {e}", exc_info=True)
+            logger.error(f"Shutdown error: {e}", exc_info=True)
 
-
-# Create FastAPI application
 app = FastAPI(
     title="AegisCAN-RT API",
     description="Deterministic ultra-low-latency BLE→CAN real-time gateway for safety-critical automotive systems",
@@ -107,11 +70,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ============================================================================
-# Middleware Configuration
-# ============================================================================
-
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -126,11 +84,6 @@ app.add_middleware(
     max_age=3600,
 )
 
-# ============================================================================
-# Router Configuration
-# ============================================================================
-
-# Include API routers
 app.include_router(
     gateway.router,
     prefix="/api/gateway",
@@ -161,11 +114,6 @@ app.include_router(
         500: {"description": "Internal Server Error"},
     },
 )
-
-# ============================================================================
-# Health Check Endpoints
-# ============================================================================
-
 
 @app.get("/health", tags=["Health"])
 async def health_check():
@@ -205,12 +153,6 @@ async def status_check():
         },
     }
 
-
-# ============================================================================
-# Error Handlers
-# ============================================================================
-
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler for unhandled errors."""
@@ -220,12 +162,6 @@ async def global_exception_handler(request, exc):
         "message": "Internal server error",
         "detail": str(exc) if settings.DEBUG else "An error occurred",
     }
-
-
-# ============================================================================
-# Main Entry Point
-# ============================================================================
-
 
 def create_app():
     """
@@ -238,7 +174,7 @@ def create_app():
 
 
 if __name__ == "__main__":
-    logger.info(f"🚀 Starting uvicorn on {settings.API_HOST}:{settings.API_PORT}")
+    logger.info(f"Starting uvicorn on {settings.API_HOST}:{settings.API_PORT}")
     uvicorn.run(
         "backend.main:app",
         host=settings.API_HOST,
