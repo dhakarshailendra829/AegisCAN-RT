@@ -1,0 +1,366 @@
+/* AegisCAN-RT Advanced Dark Theme CSS */
+
+:root {
+    --primary: #667eea;
+    --primary-dark: #764ba2;
+    --success: #00ff00;
+    --danger: #ff4444;
+    --warning: #ff8800;
+    --info: #00bfff;
+    --bg-primary: #0f0c29;
+    --bg-secondary: #302b63;
+    --bg-tertiary: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+}
+
+/* ============================================================================
+   Global Styles
+   ============================================================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   Typography
+   ============================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary);
+    text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+}
+
+/* ============================================================================
+   Cards & Containers
+   ============================================================================ */
+
+.metric-card {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 20px;
+    border-radius: 10px;
+    color: var(--text-primary);
+    margin: 10px 0;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    border: 1px solid rgba(118, 75, 162, 0.5);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+.info-card {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+    border-left: 4px solid var(--primary);
+    border-radius: 5px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+/* ============================================================================
+   Status Badges
+   ============================================================================ */
+
+.status-active {
+    color: var(--success);
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.status-inactive {
+    color: var(--danger);
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.status-warning {
+    color: var(--warning);
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+}
+
+/* ============================================================================
+   Alerts
+   ============================================================================ */
+
+.alert-critical {
+    background-color: rgba(255, 68, 68, 0.1);
+    border-left: 4px solid var(--danger);
+    color: var(--danger);
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.alert-high {
+    background-color: rgba(255, 136, 0, 0.1);
+    border-left: 4px solid var(--warning);
+    color: var(--warning);
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.alert-medium {
+    background-color: rgba(0, 191, 255, 0.1);
+    border-left: 4px solid var(--info);
+    color: var(--info);
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+.alert-success {
+    background-color: rgba(0, 255, 0, 0.1);
+    border-left: 4px solid var(--success);
+    color: var(--success);
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+/* ============================================================================
+   Buttons
+   ============================================================================ */
+
+.btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #cc0000 100%);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 6px 20px rgba(255, 68, 68, 0.6);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success) 0%, #00cc00 100%);
+}
+
+.btn-success:hover {
+    box-shadow: 0 6px 20px rgba(0, 255, 0, 0.6);
+}
+
+/* ============================================================================
+   Forms
+   ============================================================================ */
+
+input, textarea, select {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--primary);
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+}
+
+input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* ============================================================================
+   Tables
+   ============================================================================ */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+thead {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--text-primary);
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}
+
+/* ============================================================================
+   Scrollbars
+   ============================================================================ */
+
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-glow {
+    animation: glow 2s infinite;
+}
+
+.animate-slideIn {
+    animation: slideIn 0.5s ease-out;
+}
+
+/* ============================================================================
+   Responsive Design
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    .metric-card {
+        padding: 15px;
+        margin: 5px 0;
+    }
+
+    table {
+        font-size: 0.9rem;
+    }
+
+    th, td {
+        padding: 8px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    .metric-card {
+        padding: 10px;
+    }
+
+    input, textarea, select {
+        padding: 8px;
+        font-size: 0.95rem;
+    }
+}

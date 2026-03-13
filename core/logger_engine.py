@@ -63,4 +63,11 @@ class LoggerEngine:
         self.logger.critical(msg, extra=extra)
 
 logger_engine = LoggerEngine()
-logger = logger_engine.logger  
+logger = logger_engine.logger
+
+
+def get_logger(name: str) -> logging.Logger:
+    """
+    Return a named logger using the configured logging engine.
+    """
+    return logging.getLogger(name)

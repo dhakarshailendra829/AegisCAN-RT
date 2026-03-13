@@ -1,141 +1,303 @@
+"""
+UDP to CAN frame translation with attack simulation.
+
+Features:
+- Real-time UDP packet reception
+- CAN frame generation and transmission
+- Steering angle scaling
+- Attack mode injection
+- Latency measurement
+- Error recovery
+"""
+
 import asyncio
-import time
+import logging
 import socket
 import struct
+import time
 from queue import PriorityQueue, Empty
-import can
-from core.logger_engine import logger
-from core.event_bus import event_bus
-from core.task_manager import task_manager
+from typing import Optional, Tuple
+from dataclasses import dataclass
+
+try:
+    import can
+except ImportError:
+    can = None
+
+from core.event_bus import event_bus, EventTopic
+
+logger = logging.getLogger(__name__)
+
+# Configuration
+CAN_INTERFACE_PRIORITY = ["virtual", "socketcan"]  # Try in order
+CAN_CHANNEL = "vcan0"
+CAN_ARBITRATION_ID = 0x100
+STEERING_SCALE_FACTOR = 900 / 255  # Raw (0-255) to degrees (0-900)
+UDP_LISTEN_IP = "127.0.0.1"
+UDP_LISTEN_PORT = 5005
+
+
+@dataclass
+class PacketMetrics:
+    """Metrics for a processed packet."""
+    priority: int
+    timestamp_us: int
+    steering_angle: int
+    latency_us: int
+    queue_size: int
+    attack_mode: Optional[str] = None
 
 
 class CANTranslator:
-    def __init__(self, event_bus=event_bus, attack_mode: str | None = None):
-        self.event_bus = event_bus
-        self.queue = PriorityQueue(maxsize=500)
+    """
+    Translates UDP steering packets to CAN frames.
+
+    Features:
+    - UDP socket listening
+    - Priority queue buffering
+    - CAN frame transmission
+    - Steering angle scaling
+    - Attack simulation
+    - Latency measurement
+    - Graceful error recovery
+    """
+
+    def __init__(self, attack_mode: Optional[str] = None):
+        """
+        Initialize CAN translator.
+
+        Args:
+            attack_mode: Initial attack mode (dos, flip, heart, or None)
+        """
+        self.queue: PriorityQueue = PriorityQueue(maxsize=500)
         self.running = False
         self.attack_mode = attack_mode
-        self.can_bus: can.interface.Bus | None = None
-        self._udp_task: asyncio.Task | None = None
-        self._process_task: asyncio.Task | None = None
+        self.can_bus: Optional[can.Bus] = None
+        self._udp_task: Optional[asyncio.Task] = None
+        self._process_task: Optional[asyncio.Task] = None
+        self._sock: Optional[socket.socket] = None
+        self._logger = logging.getLogger(__name__)
+        self._packet_count = 0
+        self._error_count = 0
 
-    def scale_steering(self, raw: int) -> int:
-        return int((raw - 127) * (900 / 255))
+    def _setup_can_bus(self) -> None:
+        """Setup CAN bus with fallback options."""
+        if can is None:
+            self._logger.warning("python-can not installed - CAN disabled")
+            return
 
-    def _setup_can_bus(self):
-        try:
-            self.can_bus = can.interface.Bus(interface='virtual', channel='vcan0', receive_own_messages=True)
-            logger.info("CAN bus initialized: virtual")
-        except Exception:
+        for interface in CAN_INTERFACE_PRIORITY:
             try:
-                self.can_bus = can.interface.Bus(interface='socketcan', channel='vcan0')
-                logger.info("CAN bus initialized: socketcan")
+                self.can_bus = can.interface.Bus(
+                    interface=interface,
+                    channel=CAN_CHANNEL,
+                    receive_own_messages=True
+                )
+                self._logger.info(f"CAN bus initialized: {interface}")
+                return
             except Exception as e:
-                logger.error(f"Failed to initialize CAN bus: {e}", exc_info=True)
-                raise
+                self._logger.debug(f"Failed to initialize {interface}: {e}")
+                continue
 
-    async def _udp_receiver_loop(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(("127.0.0.1", 5005))
-        sock.setblocking(False)
+        raise RuntimeError("Failed to initialize CAN bus on any interface")
+
+    def _scale_steering(self, raw: int) -> int:
+        """
+        Scale raw steering value (0-255) to angle (0-900 degrees).
+
+        Args:
+            raw: Raw steering value (0-255)
+
+        Returns:
+            int: Steering angle (-450 to 450 degrees)
+        """
+        return int((raw - 127) * STEERING_SCALE_FACTOR)
+
+    async def _udp_receiver_loop(self) -> None:
+        """Listen for UDP packets and queue them."""
+        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self._sock.bind((UDP_LISTEN_IP, UDP_LISTEN_PORT))
+        self._sock.setblocking(False)
 
         loop = asyncio.get_running_loop()
+
+        self._logger.info(f"UDP receiver listening on {UDP_LISTEN_IP}:{UDP_LISTEN_PORT}")
 
         try:
             while self.running:
                 try:
-                    data, _ = await loop.sock_recvfrom(sock, 64)
+                    data, _ = await loop.sock_recvfrom(self._sock, 64)
+
                     if len(data) >= 10:
+                        # Parse: [priority(1)][timestamp(8)][ble_data]
                         priority = data[0]
                         ts_us = struct.unpack('<Q', data[1:9])[0]
-                        await asyncio.to_thread(self.queue.put_nowait, (priority, ts_us, data[9:]))
-                        logger.debug(f"Received UDP packet: priority={priority}, len={len(data[9:])}")
+                        ble_data = data[9:]
+
+                        try:
+                            await asyncio.to_thread(
+                                self.queue.put_nowait,
+                                (priority, ts_us, ble_data)
+                            )
+                            self._logger.debug(
+                                f"UDP packet queued: priority={priority}, "
+                                f"len={len(ble_data)}"
+                            )
+                        except Exception as e:
+                            self._logger.warning(f"Queue error: {e}")
+
                 except BlockingIOError:
                     await asyncio.sleep(0.005)
+
                 except Exception as e:
-                    logger.error(f"UDP receive error: {e}", exc_info=True)
+                    self._error_count += 1
+                    self._logger.error(f"UDP receive error: {e}", exc_info=True)
                     await asyncio.sleep(0.5)
+
         finally:
-            sock.close()
-            logger.info("UDP receiver loop ended")
+            if self._sock:
+                self._sock.close()
+                self._sock = None
+            self._logger.info("UDP receiver loop ended")
 
-    def process_packet(self, item: tuple[int, int, bytes]):
+    def _process_packet(self, item: Tuple[int, int, bytes]) -> None:
+        """Process a single packet and send via CAN."""
         priority, ts_us, ble_data = item
-        raw = ble_data[0] if ble_data else 127
-        steering_angle = self.scale_steering(raw)
 
-        if self.attack_mode == "flip":
-            steering_angle = -steering_angle
-        elif self.attack_mode == "dos":
-            time.sleep(0.05)  
-        elif self.attack_mode == "heart":
-            return  
-
-        can_data = struct.pack('<h', steering_angle)
-        msg = can.Message(arbitration_id=0x100, data=can_data, is_extended_id=False)
-
-        t0 = time.perf_counter()
         try:
-            self.can_bus.send(msg)
+            # Extract steering value
+            raw = ble_data[0] if ble_data else 127
+            steering_angle = self._scale_steering(raw)
+
+            # Apply attack mode
+            if self.attack_mode == "flip":
+                steering_angle = -steering_angle
+            elif self.attack_mode == "dos":
+                time.sleep(0.05)  # Intentional delay
+            elif self.attack_mode == "heart":
+                return  # Drop the message
+
+            # Prepare CAN message
+            can_data = struct.pack('<h', steering_angle)
+            msg = can.Message(
+                arbitration_id=CAN_ARBITRATION_ID,
+                data=can_data,
+                is_extended_id=False
+            )
+
+            # Send and measure latency
+            t0 = time.perf_counter()
+
+            if self.can_bus:
+                self.can_bus.send(msg)
+
             latency_us = int((time.perf_counter() - t0) * 1_000_000)
+            self._packet_count += 1
 
-            asyncio.create_task(self.event_bus.publish("can.tx", {
-                "angle": steering_angle,
-                "latency_us": latency_us,
-                "queue_size": self.queue.qsize(),
-                "timestamp_us": ts_us,
-                "type": "CAN_TX"
-            }))
-            logger.debug(f"CAN message sent: angle={steering_angle}, latency={latency_us}us")
+            # Publish telemetry event
+            asyncio.create_task(
+                event_bus.publish(
+                    EventTopic.CAN_TX.value,
+                    {
+                        "angle": steering_angle,
+                        "latency_us": latency_us,
+                        "queue_size": self.queue.qsize(),
+                        "timestamp_us": ts_us,
+                        "attack_mode": self.attack_mode,
+                        "packet_number": self._packet_count
+                    }
+                )
+            )
+
+            self._logger.debug(
+                f"CAN TX: angle={steering_angle}°, latency={latency_us}µs"
+            )
+
         except Exception as e:
-            logger.error(f"CAN send failed: {e}", exc_info=True)
+            self._error_count += 1
+            self._logger.error(f"CAN packet processing failed: {e}", exc_info=True)
 
-    async def _process_loop(self):
+    async def _process_loop(self) -> None:
+        """Main packet processing loop."""
+        self._logger.info("CAN process loop started")
+
         while self.running:
             try:
+                # Get packet from queue
                 packet = await asyncio.wait_for(
                     asyncio.to_thread(self.queue.get_nowait),
                     timeout=0.1
                 )
-                self.process_packet(packet)
-            except (asyncio.TimeoutError, Empty):
-                await asyncio.sleep(0.005)  
+                self._process_packet(packet)
+
+            except asyncio.TimeoutError:
+                await asyncio.sleep(0.005)
+
+            except Empty:
+                await asyncio.sleep(0.005)
+
             except Exception as e:
-                logger.error(f"Packet processing error: {e}", exc_info=True)
+                self._error_count += 1
+                self._logger.error(f"Process loop error: {e}", exc_info=True)
                 await asyncio.sleep(0.5)
 
-    async def start(self):
+        self._logger.info("CAN process loop ended")
+
+    async def start(self) -> None:
+        """Start CAN translator."""
         if self.running:
-            logger.debug("CANTranslator already running")
+            self._logger.warning("CANTranslator already running")
             return
 
-        self.running = True
-        logger.info(f"Starting CANTranslator (attack_mode={self.attack_mode})")
+        try:
+            self._setup_can_bus()
+        except Exception as e:
+            self._logger.error(f"Failed to setup CAN bus: {e}")
+            raise
 
-        self._setup_can_bus()
+        self.running = True
+        self._logger.info(f"Starting CANTranslator (attack_mode={self.attack_mode})")
 
         self._udp_task = asyncio.create_task(self._udp_receiver_loop())
         self._process_task = asyncio.create_task(self._process_loop())
 
-    async def stop(self):
+        self._logger.info("CANTranslator started successfully")
+
+    async def stop(self) -> None:
+        """Stop CAN translator gracefully."""
         if not self.running:
             return
 
         self.running = False
-        logger.info("Stopping CANTranslator")
+        self._logger.info("Stopping CANTranslator")
 
+        # Cancel tasks
         tasks = [t for t in [self._udp_task, self._process_task] if t and not t.done()]
-        for t in tasks:
-            t.cancel()
+
+        for task in tasks:
+            task.cancel()
 
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
+        # Close CAN bus
         if self.can_bus:
-            try:
-                self.can_bus.shutdown()
-            except Exception as e:
-                logger.error(f"CAN bus shutdown failed: {e}")
+            self.can_bus.shutdown()
+            self.can_bus = None
 
-        logger.info("CANTranslator stopped")
+        self._logger.info(
+            f"CANTranslator stopped (packets={self._packet_count}, "
+            f"errors={self._error_count})"
+        )
+
+    def health_status(self) -> dict:
+        """Get translator health status."""
+        return {
+            "running": self.running,
+            "attack_mode": self.attack_mode,
+            "queue_size": self.queue.qsize(),
+            "packets_processed": self._packet_count,
+            "errors": self._error_count,
+            "can_available": self.can_bus is not None
+        }

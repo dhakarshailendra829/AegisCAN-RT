@@ -1,12 +1,82 @@
-version: '3.9'
+version: '3.8'
+
 services:
+  # ========================================================================
+  # FastAPI Backend
+  # ========================================================================
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aegiscan-backend
     ports:
       - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DEBUG=False
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DATABASE_URL=sqlite+aiosqlite:///./data/aegiscan.db
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - aegiscan-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - redis
+
+  # ========================================================================
+  # Streamlit Frontend
+  # ========================================================================
+  frontend:
+    image: python:3.11-slim
+    container_name: aegiscan-frontend
+    working_dir: /app
+    command: >
+      bash -c "pip install streamlit plotly pandas requests -q &&
+               streamlit run frontend/streamlit_app.py
+                 --server.port=8501
+                 --server.address=0.0.0.0
+                 --client.showErrorDetails=true"
+    ports:
+      - "8501:8501"
     volumes:
       - .:/app
-      - ./data:/app/data
-    env_file:
-      - .env
-    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - aegiscan-network
+    restart: unless-stopped
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    depends_on:
+      - backend
+
+  # ========================================================================
+  # Redis Cache (Optional)
+  # ========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: aegiscan-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - aegiscan-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+networks:
+  aegiscan-network:
+    driver: bridge
+
+volumes:
+  redis_data:
