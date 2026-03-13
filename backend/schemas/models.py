@@ -186,11 +186,6 @@ class Telemetry(BaseModel):
             }
         }
 
-
-# ============================================================================
-# Error Models
-# ============================================================================
-
 class ErrorResponse(BaseModel):
     """Standard error response."""
     status: str = Field(default="error", description="Error status")
