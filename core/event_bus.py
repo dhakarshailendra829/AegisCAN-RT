@@ -17,7 +17,6 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
-
 class EventTopic(str, Enum):
     """Standard event topics."""
     CAN_TX = "can.tx"
@@ -66,7 +65,6 @@ class EventBus:
             raise TypeError(f"Callback must be callable, got {type(callback)}")
 
         if once:
-            # Wrap callback to remove itself after execution
             original_callback = callback
 
             async def one_time_callback(data: Any) -> None:
@@ -135,7 +133,7 @@ class EventBus:
             return 0
 
         self._active_topics.add(topic)
-        callbacks = self._subscribers[topic][:]  # Copy to avoid modification during iteration
+        callbacks = self._subscribers[topic][:]  
         executed = 0
 
         for callback in callbacks:
@@ -180,6 +178,4 @@ class EventBus:
             "active_topics": list(self._active_topics)
         }
 
-
-# Global event bus instance
 event_bus = EventBus()
