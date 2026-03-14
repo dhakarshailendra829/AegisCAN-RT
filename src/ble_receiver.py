@@ -23,15 +23,14 @@ from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
 
-# Configuration constants
 UDP_IP = "127.0.0.1"
 UDP_PORT = 5005
 STEERING_CENTER = 127
-STEERING_RANGE = 55  # +/- degrees
+STEERING_RANGE = 55 
 STEERING_MIN = 0
 STEERING_MAX = 255
 PACKET_TIMEOUT = 0.1
-SIMULATE_INTERVAL = 0.02  # 50 Hz
+SIMULATE_INTERVAL = 0.02  
 
 
 @dataclass
@@ -98,20 +97,16 @@ class BLEReceiver:
 
             while self.running:
                 try:
-                    # Get packet from queue with timeout
                     priority, ts, data = await asyncio.wait_for(
                         asyncio.to_thread(self.queue.get_nowait),
                         timeout=PACKET_TIMEOUT
                     )
 
-                    # Pack: [priority(1byte)][timestamp(8bytes)][data(remaining)]
                     packet = bytes([priority]) + struct.pack('<Q', ts) + data
 
-                    # Send via UDP
                     self._sock.sendto(packet, (UDP_IP, UDP_PORT))
                     self._packet_count += 1
 
-                    # Publish telemetry event
                     await event_bus.publish(
                         EventTopic.BLE_TX.value,
                         {
@@ -127,7 +122,6 @@ class BLEReceiver:
                     )
 
                 except asyncio.TimeoutError:
-                    # No packet available
                     continue
 
                 except Full:
@@ -159,20 +153,17 @@ class BLEReceiver:
 
         while self.running:
             try:
-                # Generate realistic steering angle variation
                 steering_val = int(
                     STEERING_CENTER + STEERING_RANGE * random.uniform(-1, 1)
                 )
                 steering_val = max(STEERING_MIN, min(STEERING_MAX, steering_val))
                 data = bytes([steering_val])
 
-                # Create and queue packet
                 packet = self.create_packet(data, priority=0)
 
                 try:
                     self.queue.put_nowait(packet)
 
-                    # Publish BLE RX event
                     await event_bus.publish(
                         EventTopic.BLE_RX.value,
                         {
@@ -206,7 +197,6 @@ class BLEReceiver:
         self.running = True
         self._logger.info("Starting BLEReceiver")
 
-        # Start background tasks
         self._udp_task = asyncio.create_task(self._udp_forward_loop())
         self._simulate_task = asyncio.create_task(self.simulate())
 
@@ -220,13 +210,11 @@ class BLEReceiver:
         self.running = False
         self._logger.info("Stopping BLEReceiver")
 
-        # Cancel all tasks
         tasks = [t for t in [self._udp_task, self._simulate_task] if t and not t.done()]
 
         for task in tasks:
             task.cancel()
 
-        # Wait for cancellation
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
