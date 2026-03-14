@@ -24,22 +24,12 @@ from src.gateway import Gateway
 from core.event_bus import EventBus
 from core.task_manager import TaskManager
 
-
-# ============================================================================
-# Event Loop Configuration
-# ============================================================================
-
 @pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for each test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
-
-
-# ============================================================================
-# Database Fixtures
-# ============================================================================
 
 @pytest.fixture
 def temp_db():
@@ -48,7 +38,6 @@ def temp_db():
         db_path = f.name
     yield db_path
     Path(db_path).unlink(missing_ok=True)
-
 
 @pytest.fixture
 async def db_engine(temp_db):
@@ -61,7 +50,6 @@ async def db_engine(temp_db):
     yield engine
     await engine.dispose()
 
-
 @pytest.fixture
 async def test_db_session(db_engine):
     """Provide test database session."""
@@ -73,11 +61,6 @@ async def test_db_session(db_engine):
     async with async_session() as session:
         yield session
 
-
-# ============================================================================
-# Configuration Fixtures
-# ============================================================================
-
 @pytest.fixture
 def test_settings():
     """Provide test settings."""
@@ -86,11 +69,6 @@ def test_settings():
         ENVIRONMENT="testing",
         DEBUG=True,
     )
-
-
-# ============================================================================
-# Event Bus Fixtures
-# ============================================================================
 
 @pytest.fixture
 def mock_event_bus():
@@ -112,11 +90,6 @@ def mock_bus_with_subscribers(mock_event_bus):
 
     return mock_event_bus, events_captured
 
-
-# ============================================================================
-# Gateway Fixtures - CORRECTED
-# ============================================================================
-
 @pytest.fixture
 def gateway():
     """
@@ -126,10 +99,8 @@ def gateway():
     """
     gw = Gateway()
     yield gw
-    # Cleanup if running
     if gw.running:
         asyncio.run(gw.stop())
-
 
 @pytest.fixture
 def running_gateway():
@@ -139,16 +110,9 @@ def running_gateway():
     This is NOT an async fixture - starts gateway synchronously.
     """
     gw = Gateway()
-    # Start gateway synchronously
     asyncio.run(gw.start())
     yield gw
-    # Stop gateway synchronously
     asyncio.run(gw.stop())
-
-
-# ============================================================================
-# API Fixtures
-# ============================================================================
 
 @pytest.fixture
 def app():
@@ -170,22 +134,12 @@ def api_headers():
         "Accept": "application/json",
     }
 
-
-# ============================================================================
-# Task Manager Fixtures
-# ============================================================================
-
 @pytest.fixture
 def clean_task_manager():
     """Provide clean task manager instance."""
     tm = TaskManager()
     yield tm
     asyncio.run(tm.shutdown_all())
-
-
-# ============================================================================
-# Pytest Configuration
-# ============================================================================
 
 def pytest_configure(config):
     """Register custom markers."""
