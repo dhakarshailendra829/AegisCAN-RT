@@ -29,13 +29,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 gateway = Gateway()
 
-# Track gateway start time for uptime calculation
 _gateway_start_time: Optional[float] = None
-
-
-# ============================================================================
-# Enums
-# ============================================================================
 
 class AttackMode(str, Enum):
     """Valid attack modes for the gateway."""
@@ -43,11 +37,6 @@ class AttackMode(str, Enum):
     BIT_FLIP = "flip"
     HEARTBEAT_DROP = "heart"
     NONE = "none"
-
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
 
 @router.get(
     "/status",
@@ -80,7 +69,6 @@ async def gateway_status():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve gateway status"
         )
-
 
 @router.get(
     "/health",
@@ -128,7 +116,6 @@ async def gateway_health():
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Health check failed"
         )
-
 
 @router.post(
     "/start",
@@ -275,7 +262,6 @@ async def trigger_attack(mode: str):
         HTTPException 500: Activation failed
     """
     try:
-        # Normalize and validate mode
         mode_lower = mode.lower() if mode else ""
         valid_modes = [e.value for e in AttackMode]
 
@@ -286,7 +272,6 @@ async def trigger_attack(mode: str):
                 detail=f"Invalid mode '{mode}'. Allowed: dos, flip, heart, or none"
             )
 
-        # Deactivate if mode is 'none'
         if mode_lower == AttackMode.NONE.value:
             logger.info("Deactivating attack mode")
             gateway.set_attack_mode(None)
@@ -296,7 +281,6 @@ async def trigger_attack(mode: str):
                 mode=None
             )
 
-        # Activate attack mode
         logger.warning(f"Activating attack mode: {mode_lower}")
         gateway.set_attack_mode(mode_lower)
 
@@ -307,7 +291,7 @@ async def trigger_attack(mode: str):
         )
 
     except HTTPException:
-        raise  # Re-raise HTTP exceptions
+        raise  
 
     except Exception as e:
         logger.error(f"Failed to set attack mode '{mode}': {e}", exc_info=True)
@@ -348,7 +332,6 @@ async def reset_gateway():
         if is_running:
             await gateway.stop()
 
-        # Reset attack mode
         gateway.set_attack_mode(None)
         _gateway_start_time = None
 
