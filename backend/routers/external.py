@@ -18,11 +18,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-
-# ============================================================================
-# API Endpoints
-# ============================================================================
-
 @router.get(
     "/weather",
     summary="Get weather data",
@@ -57,7 +52,6 @@ async def get_weather(
 
     try:
         logger.info(f"Weather request for coordinates: {latitude}, {longitude}")
-        # Placeholder for actual OpenWeather API integration
         return {
             "status": "placeholder",
             "message": "Weather API integration pending",
@@ -106,7 +100,6 @@ async def get_solar_data(
     """
     try:
         logger.info(f"Solar data request for {latitude}, {longitude}: {start_date} to {end_date}")
-        # Placeholder for actual NASA POWER API integration
         return {
             "status": "placeholder",
             "message": "NASA POWER API integration pending",
