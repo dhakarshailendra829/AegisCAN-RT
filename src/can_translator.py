@@ -28,11 +28,10 @@ from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
 
-# Configuration
-CAN_INTERFACE_PRIORITY = ["virtual", "socketcan"]  # Try in order
+CAN_INTERFACE_PRIORITY = ["virtual", "socketcan"]  
 CAN_CHANNEL = "vcan0"
 CAN_ARBITRATION_ID = 0x100
-STEERING_SCALE_FACTOR = 900 / 255  # Raw (0-255) to degrees (0-900)
+STEERING_SCALE_FACTOR = 900 / 255  
 UDP_LISTEN_IP = "127.0.0.1"
 UDP_LISTEN_PORT = 5005
 
@@ -130,7 +129,6 @@ class CANTranslator:
                     data, _ = await loop.sock_recvfrom(self._sock, 64)
 
                     if len(data) >= 10:
-                        # Parse: [priority(1)][timestamp(8)][ble_data]
                         priority = data[0]
                         ts_us = struct.unpack('<Q', data[1:9])[0]
                         ble_data = data[9:]
@@ -166,19 +164,16 @@ class CANTranslator:
         priority, ts_us, ble_data = item
 
         try:
-            # Extract steering value
             raw = ble_data[0] if ble_data else 127
             steering_angle = self._scale_steering(raw)
 
-            # Apply attack mode
             if self.attack_mode == "flip":
                 steering_angle = -steering_angle
             elif self.attack_mode == "dos":
-                time.sleep(0.05)  # Intentional delay
+                time.sleep(0.05)  
             elif self.attack_mode == "heart":
-                return  # Drop the message
+                return  
 
-            # Prepare CAN message
             can_data = struct.pack('<h', steering_angle)
             msg = can.Message(
                 arbitration_id=CAN_ARBITRATION_ID,
@@ -186,7 +181,6 @@ class CANTranslator:
                 is_extended_id=False
             )
 
-            # Send and measure latency
             t0 = time.perf_counter()
 
             if self.can_bus:
@@ -195,7 +189,6 @@ class CANTranslator:
             latency_us = int((time.perf_counter() - t0) * 1_000_000)
             self._packet_count += 1
 
-            # Publish telemetry event
             asyncio.create_task(
                 event_bus.publish(
                     EventTopic.CAN_TX.value,
@@ -224,7 +217,6 @@ class CANTranslator:
 
         while self.running:
             try:
-                # Get packet from queue
                 packet = await asyncio.wait_for(
                     asyncio.to_thread(self.queue.get_nowait),
                     timeout=0.1
@@ -272,7 +264,6 @@ class CANTranslator:
         self.running = False
         self._logger.info("Stopping CANTranslator")
 
-        # Cancel tasks
         tasks = [t for t in [self._udp_task, self._process_task] if t and not t.done()]
 
         for task in tasks:
@@ -281,7 +272,6 @@ class CANTranslator:
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
 
-        # Close CAN bus
         if self.can_bus:
             self.can_bus.shutdown()
             self.can_bus = None
