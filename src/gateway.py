@@ -47,21 +47,17 @@ class Gateway:
         self.telemetry: List[Dict[str, Any]] = []
         self.max_telemetry: int = settings.MAX_TELEMETRY_BUFFER
 
-    # Logger FIRST
         self._logger = logging.getLogger(__name__)
         self._start_time: Optional[datetime] = None
 
-    # Initialize components
         self.ble = BLEReceiver()
         self.can = CANTranslator()
         self.attack = AttackEngine()
 
-    # Subscribe to events
         event_bus.subscribe(EventTopic.CAN_TX.value, self._on_can_tx)
         event_bus.subscribe(EventTopic.ATTACK_EVENT.value, self._on_attack_event)
         event_bus.subscribe(EventTopic.SYSTEM_METRICS.value, self._on_metrics)
 
-    # Setup database
         self.db_path = Path(
             str(settings.DATABASE_URL).replace("sqlite+aiosqlite:///", "")
         )
@@ -73,7 +69,6 @@ class Gateway:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
 
-                # Telemetry table
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS telemetry (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +84,6 @@ class Gateway:
                     )
                 """)
 
-                # Indexes for performance
                 cursor.execute("""
                     CREATE INDEX IF NOT EXISTS idx_telemetry_timestamp
                     ON telemetry (timestamp DESC)
@@ -124,12 +118,10 @@ class Gateway:
 
     def _append_telemetry(self, entry: Dict[str, Any]) -> None:
         """Append telemetry to memory and database."""
-        # Memory buffer
         self.telemetry.append(entry)
         if len(self.telemetry) > self.max_telemetry:
             self.telemetry.pop(0)
 
-        # Database persistence
         row = {
             "type": entry.get("type", "UNKNOWN"),
             "angle": entry.get("angle"),
@@ -184,14 +176,12 @@ class Gateway:
         self._logger.info("Starting gateway...")
 
         try:
-            # Start components
             await self.ble.start()
             await self.can.start()
             metrics_engine.start()
 
             self._logger.info("Gateway fully started")
 
-            # Publish gateway start event
             await event_bus.publish(EventTopic.GATEWAY_START.value, {
                 "timestamp": datetime.now().isoformat(),
                 "status": "started"
@@ -212,7 +202,6 @@ class Gateway:
         self._logger.info("Stopping gateway...")
 
         try:
-            # Stop components
             await asyncio.gather(
                 self.ble.stop(),
                 self.can.stop(),
@@ -222,7 +211,6 @@ class Gateway:
 
             self._logger.info("Gateway stopped")
 
-            # Publish gateway stop event
             await event_bus.publish(EventTopic.GATEWAY_STOP.value, {
                 "timestamp": datetime.now().isoformat(),
                 "status": "stopped"
