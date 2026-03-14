@@ -8,7 +8,6 @@ Collects:
 - Active tasks count
 - Custom application metrics
 """
-
 import asyncio
 import logging
 import time
@@ -84,7 +83,6 @@ class MetricsEngine:
                 metrics = self._gather_metrics()
                 self._last_metrics = metrics
 
-                # Publish metrics event
                 await event_bus.publish(
                     EventTopic.SYSTEM_METRICS.value,
                     metrics.to_dict()
@@ -173,6 +171,4 @@ class MetricsEngine:
             "psutil_available": psutil is not None
         }
 
-
-# Global metrics engine instance
 metrics_engine = MetricsEngine(interval=5.0)
