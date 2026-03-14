@@ -26,11 +26,9 @@ def test_preprocess_telemetry(sample_telemetry_df):
     """Test telemetry preprocessing keeps data intact."""
     processed = preprocess_telemetry(sample_telemetry_df)
     
-    # Check new columns added
     assert "latency_ms" in processed.columns
     assert "jitter_ms" in processed.columns
     
-    # Allow 1 row loss due to outlier removal
     assert len(processed) >= len(sample_telemetry_df) - 2
 
 
@@ -46,10 +44,8 @@ async def test_anomaly_detector_detect(sample_telemetry_df):
     """Test anomaly detection on sample data."""
     detector = AnomalyDetector(contamination=0.1)
     
-    # detect() is async, must await
     predictions, event = await detector.detect(sample_telemetry_df)
     
-    # Verify results
     assert predictions is not None or event is None
     if event:
         assert 0 <= event.anomaly_ratio <= 1
