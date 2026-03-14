@@ -10,13 +10,7 @@ Provides:
 from typing import Optional, Any, Dict, List
 from datetime import datetime
 from enum import Enum
-
 from pydantic import BaseModel, Field, field_validator
-
-
-# ============================================================================
-# Enums
-# ============================================================================
 
 class GatewayStatusEnum(str, Enum):
     """Gateway operational status."""
@@ -25,7 +19,6 @@ class GatewayStatusEnum(str, Enum):
     ALREADY_RUNNING = "already_running"
     ALREADY_STOPPED = "already_stopped"
 
-
 class AttackModeEnum(str, Enum):
     """Valid attack simulation modes."""
     DOS = "dos"
@@ -33,17 +26,11 @@ class AttackModeEnum(str, Enum):
     HEARTBEAT_DROP = "heart"
     NONE = "none"
 
-
 class OperationStatusEnum(str, Enum):
     """Operation result status."""
     SUCCESS = "success"
     ERROR = "error"
     PENDING = "pending"
-
-
-# ============================================================================
-# Gateway Models
-# ============================================================================
 
 class StatusResponse(BaseModel):
     """Standard gateway status response."""
@@ -57,7 +44,6 @@ class StatusResponse(BaseModel):
                 "message": "BLE-CAN gateway ready"
             }
         }
-
 
 class HealthResponse(BaseModel):
     """Detailed gateway health information."""
@@ -80,7 +66,6 @@ class HealthResponse(BaseModel):
             }
         }
 
-
 class AttackResponse(BaseModel):
     """Attack mode operation response."""
     status: str = Field(..., description="Operation status")
@@ -95,11 +80,6 @@ class AttackResponse(BaseModel):
                 "mode": "dos"
             }
         }
-
-
-# ============================================================================
-# CAN Models
-# ============================================================================
 
 class CANFrame(BaseModel):
     """CAN bus frame model."""
@@ -126,11 +106,6 @@ class CANFrame(BaseModel):
             }
         }
 
-
-# ============================================================================
-# Telemetry Models
-# ============================================================================
-
 class TelemetryEntry(BaseModel):
     """Single telemetry data entry."""
     type: str = Field(..., description="Entry type (CAN_TX, ATTACK, etc)")
@@ -154,7 +129,6 @@ class TelemetryEntry(BaseModel):
             }
         }
 
-
 class TelemetryResponse(BaseModel):
     """Telemetry data response."""
     count: int = Field(..., description="Number of entries returned")
@@ -169,7 +143,6 @@ class TelemetryResponse(BaseModel):
                 "has_more": False
             }
         }
-
 
 class Telemetry(BaseModel):
     """Telemetry metrics model."""
