@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Initialize analytics components
 anomaly_detector = AnomalyDetector(contamination=0.05)
 attack_classifier = CyberAttackClassifier()
 latency_predictor = LatencyPredictor(window_size=100)
@@ -66,7 +65,6 @@ async def detect_anomalies(
                 "anomalies": []
             }
 
-        # Run anomaly detection
         predictions, event = await anomaly_detector.detect(df, threshold=threshold)
 
         if event is None:
@@ -121,7 +119,6 @@ async def classify_attack(
                 "classifications": []
             }
 
-        # Extract features and classify
         from analytics.utils import extract_features, preprocess_telemetry
 
         processed = preprocess_telemetry(df)
@@ -150,7 +147,6 @@ async def classify_attack(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Classification failed: {str(e)}"
         )
-
 
 @router.get("/latency/trends")
 async def get_latency_trends():
@@ -182,7 +178,6 @@ async def get_health_status():
         "attack_classifier": attack_classifier.health_status(),
         "latency_predictor": latency_predictor.health_status()
     }
-
 
 @router.post("/health/thresholds")
 async def update_health_thresholds(
