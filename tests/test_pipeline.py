@@ -1,7 +1,3 @@
-# ============================================================================
-# tests/test_pipeline.py - FINAL CORRECTED VERSION
-# ============================================================================
-
 """
 Tests for data pipeline and steering angle conversion.
 
@@ -20,29 +16,23 @@ def translator():
 
 def test_scale_steering(translator):
     """Test steering angle scaling from raw (0-255) to degrees (±900)."""
-    # Test center point (127 -> ~0)
     result = translator._scale_steering(127)
     assert -50 <= result <= 50, f"Center should be near 0, got {result}"
     
-    # Test max positive (255 -> ~900)
     result = translator._scale_steering(255)
     assert 400 <= result <= 1000, f"Max should be near 900, got {result}"
     
-    # Test max negative (0 -> ~-900)
     result = translator._scale_steering(0)
     assert -1000 <= result <= -400, f"Min should be near -900, got {result}"
 
 
 def test_scale_range(translator):
     """Test steering angle range constraints."""
-    # Negative angles for low values
     result_0 = translator._scale_steering(0)
     assert result_0 < 0, f"Value 0 should be negative, got {result_0}"
     
-    # Positive angles for high values
     result_255 = translator._scale_steering(255)
     assert result_255 > 0, f"Value 255 should be positive, got {result_255}"
     
-    # Center should be near zero
     result_127 = translator._scale_steering(127)
     assert -100 <= result_127 <= 100, f"Center should be near 0, got {result_127}"
