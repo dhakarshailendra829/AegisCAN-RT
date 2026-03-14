@@ -1,15 +1,3 @@
-"""
-Production-grade Streamlit dashboard for AegisCAN-RT.
-
-Features:
-- Real-time gateway monitoring
-- Attack detection and classification
-- System health visualization
-- Secure authentication
-- Advanced analytics
-- Error handling and resilience
-"""
-
 import streamlit as st
 import requests
 import pandas as pd
@@ -20,17 +8,11 @@ from datetime import datetime, timedelta
 import logging
 from typing import Optional, Dict, Any
 
-# Configuration
 API_BASE = "http://localhost:8000"
 API_TIMEOUT = 10
-REFRESH_INTERVAL = 2  # seconds
+REFRESH_INTERVAL = 2  
 
 logger = logging.getLogger(__name__)
-
-
-# ============================================================================
-# Page Configuration
-# ============================================================================
 
 st.set_page_config(
     page_title="AegisCAN-RT Command Center",
@@ -44,7 +26,6 @@ st.set_page_config(
     }
 )
 
-# Apply custom CSS
 st.markdown("""
 <style>
     /* Dark Theme */
@@ -218,11 +199,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
-# ============================================================================
-# Utility Functions
-# ============================================================================
-
 @st.cache_resource
 def get_api_session():
     """Get requests session with timeout."""
@@ -232,17 +208,6 @@ def get_api_session():
 
 
 def make_api_call(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Optional[Dict]:
-    """
-    Make API call with error handling and resilience.
-
-    Args:
-        endpoint: API endpoint path
-        method: HTTP method
-        data: Request data for POST
-
-    Returns:
-        Response JSON or None
-    """
     try:
         url = f"{API_BASE}{endpoint}"
         session = get_api_session()
@@ -260,44 +225,28 @@ def make_api_call(endpoint: str, method: str = "GET", data: Optional[Dict] = Non
         return response.json()
 
     except requests.exceptions.ConnectionError:
-        st.error("❌ Cannot connect to API server at " + API_BASE)
+        st.error("Cannot connect to API server at " + API_BASE)
         return None
     except requests.exceptions.Timeout:
-        st.error("⏱️ API request timeout (>10s)")
+        st.error("API request timeout (>10s)")
         return None
     except requests.exceptions.HTTPError as e:
-        st.error(f"❌ API Error: {e.response.status_code}")
+        st.error(f"API Error: {e.response.status_code}")
         return None
     except ValueError as e:
-        st.error(f"❌ Invalid response format: {str(e)}")
+        st.error(f"Invalid response format: {str(e)}")
         return None
     except Exception as e:
-        st.error(f"❌ Unexpected error: {str(e)}")
+        st.error(f"Unexpected error: {str(e)}")
         return None
 
 
 def safe_format(value: Any, default: str = "N/A", format_spec: str = "") -> str:
-    """
-    Safely format a value with None handling.
-
-    Args:
-        value: Value to format
-        default: Default if value is None
-        format_spec: Format specification (e.g., ".2f")
-
-    Returns:
-        Formatted string
-    """
     if value is None:
         return default
     if format_spec:
         return f"{value:{format_spec}}"
     return str(value)
-
-
-# ============================================================================
-# Session State Management
-# ============================================================================
 
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -308,11 +257,6 @@ if "last_refresh" not in st.session_state:
 if "gateway_running" not in st.session_state:
     st.session_state.gateway_running = False
 
-
-# ============================================================================
-# Authentication
-# ============================================================================
-
 def login_page():
     """Display login/register page with modern styling."""
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -320,7 +264,7 @@ def login_page():
     with col2:
         st.markdown("""
         <div style='text-align: center; padding: 40px 0;'>
-            <h1 style='font-size: 48px; color: #667eea;'>🛡️ AegisCAN-RT</h1>
+            <h1 style='font-size: 48px; color: #667eea;'>AegisCAN-RT</h1>
             <h3 style='color: #764ba2;'>Secure Command Center</h3>
             <p style='color: #888; margin-top: 20px;'>
                 Deterministic ultra-low-latency BLE→CAN real-time gateway
@@ -328,21 +272,21 @@ def login_page():
         </div>
         """, unsafe_allow_html=True)
 
-        tabs = st.tabs(["🔓 Login", "📝 Register"])
+        tabs = st.tabs(["Login", "Register"])
 
         with tabs[0]:
             st.markdown("#### Operator Login")
             username = st.text_input("Username", key="login_user", placeholder="Enter your username")
             password = st.text_input("Password", type="password", key="login_pass", placeholder="Enter your password")
 
-            if st.button("🔓 Login", use_container_width=True, key="login_btn"):
+            if st.button("Login", use_container_width=True, key="login_btn"):
                 if username and password:
                     st.session_state.authenticated = True
                     st.session_state.username = username
-                    st.success("✅ Login successful!")
+                    st.success("Login successful!")
                     st.rerun()
                 else:
-                    st.error("❌ Please enter username and password")
+                    st.error("Please enter username and password")
 
         with tabs[1]:
             st.markdown("#### Register New Operator")
@@ -350,55 +294,49 @@ def login_page():
             new_password = st.text_input("Password", type="password", key="reg_pass", placeholder="Create a password")
             confirm_password = st.text_input("Confirm Password", type="password", key="reg_pass_confirm", placeholder="Confirm password")
 
-            if st.button("📝 Register", use_container_width=True, key="register_btn"):
+            if st.button("Register", use_container_width=True, key="register_btn"):
                 if len(new_username) < 3:
-                    st.error("❌ Username must be at least 3 characters")
+                    st.error("Username must be at least 3 characters")
                 elif new_password != confirm_password:
-                    st.error("❌ Passwords don't match")
+                    st.error("Passwords don't match")
                 elif len(new_password) < 6:
-                    st.error("❌ Password must be at least 6 characters")
+                    st.error("Password must be at least 6 characters")
                 else:
-                    st.success("✅ Registration successful! Please login.")
-
-
-# ============================================================================
-# Main Dashboard
-# ============================================================================
+                    st.success("Registration successful! Please login.")
 
 def main_dashboard():
-    """Display main dashboard with real-time data."""
-    st.markdown(f"# 🛡️ AegisCAN-RT Command Center")
+    st.markdown(f"# AegisCAN-RT Command Center")
     st.markdown(f"**Operator:** {st.session_state.username} | **Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
     # Sidebar controls
     with st.sidebar:
-        st.header("⚙️ Controls")
+        st.header("Controls")
 
-        if st.button("🔄 Refresh Now", use_container_width=True):
+        if st.button("Refresh Now", use_container_width=True):
             st.rerun()
 
         st.divider()
 
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("▶️ Start", use_container_width=True):
+            if st.button("Start", use_container_width=True):
                 result = make_api_call("/api/gateway/start", method="POST")
                 if result:
                     st.session_state.gateway_running = True
-                    st.success("✅ Gateway started")
+                    st.success("Gateway started")
                     st.rerun()
 
         with col2:
-            if st.button("⏹️ Stop", use_container_width=True):
+            if st.button("Stop", use_container_width=True):
                 result = make_api_call("/api/gateway/stop", method="POST")
                 if result:
                     st.session_state.gateway_running = False
-                    st.success("✅ Gateway stopped")
+                    st.success("Gateway stopped")
                     st.rerun()
 
         st.divider()
 
-        st.subheader("🎯 Attack Modes")
+        st.subheader("Attack Modes")
         attack_mode = st.selectbox(
             "Select Mode",
             ["none", "dos", "flip", "heart"],
@@ -408,32 +346,29 @@ def main_dashboard():
         if st.button("⚡ Activate", use_container_width=True):
             result = make_api_call(f"/api/gateway/attack/{attack_mode}", method="POST")
             if result and result.get("status") == "success":
-                st.success(f"✅ {attack_mode.upper()} activated")
+                st.success(f"{attack_mode.upper()} activated")
             else:
-                st.error(f"❌ Failed to activate {attack_mode}")
+                st.error(f"Failed to activate {attack_mode}")
 
         st.divider()
 
-        if st.button("🚪 Logout", use_container_width=True):
+        if st.button("Logout", use_container_width=True):
             st.session_state.authenticated = False
             st.session_state.username = None
-            st.success("✅ Logged out")
+            st.success("Logged out")
             st.rerun()
 
-    # Main content tabs
     tabs = st.tabs([
-        "📊 Dashboard",
-        "📈 Analytics",
-        "🚨 Alerts",
-        "🔍 Telemetry",
-        "⚙️ Settings"
+        "Dashboard",
+        "Analytics",
+        "Alerts",
+        "Telemetry",
+        "Settings"
     ])
 
-    # ====== TAB 1: Dashboard ======
     with tabs[0]:
         st.subheader("Real-Time Status")
 
-        # Get current status
         status_data = make_api_call("/api/gateway/status")
         health_data = make_api_call("/api/gateway/health")
 
@@ -442,7 +377,7 @@ def main_dashboard():
 
             with col1:
                 running = health_data.get("is_running", False)
-                status_text = "🟢 ACTIVE" if running else "🔴 INACTIVE"
+                status_text = "ACTIVE" if running else "INACTIVE"
                 st.metric(
                     "Gateway Status",
                     status_text,
@@ -475,7 +410,6 @@ def main_dashboard():
                     help="Active attack simulation"
                 )
 
-            # System metrics
             st.subheader("System Resources")
 
             metrics_data = make_api_call("/api/analytics/health/status")
@@ -502,12 +436,11 @@ def main_dashboard():
                 with col3:
                     if "anomaly_detector" in metrics_data:
                         detector = metrics_data.get("anomaly_detector", {})
-                        avail = "✅ Active" if detector.get("available") else "❌ Inactive"
-                        trained = "✅ Yes" if detector.get("trained") else "❌ No"
+                        avail = "Active" if detector.get("available") else "Inactive"
+                        trained = "Yes" if detector.get("trained") else "No"
                         st.write(f"**Detector:** {avail}")
                         st.write(f"**Trained:** {trained}")
 
-    # ====== TAB 2: Analytics ======
     with tabs[1]:
         st.subheader("Advanced Analytics")
 
@@ -549,7 +482,7 @@ def main_dashboard():
                 )
                 st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("ℹ️ No anomaly data available")
+                st.info("No anomaly data available")
 
         with col2:
             st.markdown("#### Attack Classification")
@@ -573,11 +506,10 @@ def main_dashboard():
                     )
                     st.plotly_chart(fig, use_container_width=True)
                 else:
-                    st.info("ℹ️ No attack classifications available")
+                    st.info("No attack classifications available")
             else:
-                st.info("ℹ️ Attack classification not available")
+                st.info("Attack classification not available")
 
-    # ====== TAB 3: Alerts ======
     with tabs[2]:
         st.subheader("System Alerts")
 
@@ -590,35 +522,34 @@ def main_dashboard():
             if severity == "CRITICAL":
                 st.markdown(f"""
                 <div class='alert-critical'>
-                🚨 <strong>CRITICAL ALERT</strong><br>
+                <strong>CRITICAL ALERT</strong><br>
                 Anomaly Ratio: {ratio:.1%}
                 </div>
                 """, unsafe_allow_html=True)
             elif severity == "HIGH":
                 st.markdown(f"""
                 <div class='alert-high'>
-                ⚠️ <strong>HIGH PRIORITY</strong><br>
+                <strong>HIGH PRIORITY</strong><br>
                 Anomaly Ratio: {ratio:.1%}
                 </div>
                 """, unsafe_allow_html=True)
             elif severity == "MEDIUM":
                 st.markdown(f"""
                 <div class='alert-medium'>
-                ℹ️ <strong>MEDIUM PRIORITY</strong><br>
+                <strong>MEDIUM PRIORITY</strong><br>
                 Anomaly Ratio: {ratio:.1%}
                 </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div class='alert-success'>
-                ✅ <strong>ALL CLEAR</strong><br>
+                <strong>ALL CLEAR</strong><br>
                 Anomaly Ratio: {ratio:.1%}
                 </div>
                 """, unsafe_allow_html=True)
         else:
-            st.warning("⚠️ Unable to fetch alert data")
+            st.warning("Unable to fetch alert data")
 
-    # ====== TAB 4: Telemetry ======
     with tabs[3]:
         st.subheader("Telemetry Data")
 
@@ -626,7 +557,7 @@ def main_dashboard():
         with col1:
             limit = st.slider("Data Points to Display", 10, 1000, 200)
         with col2:
-            if st.button("📥 Refresh"):
+            if st.button("Refresh"):
                 st.rerun()
 
         telemetry_data = make_api_call(f"/api/analytics/telemetry?limit={limit}")
@@ -638,10 +569,8 @@ def main_dashboard():
             if entries:
                 df = pd.DataFrame(entries)
 
-                # Display table
                 st.dataframe(df, use_container_width=True, height=300)
 
-                # Plot latency if available
                 if "latency_us" in df.columns:
                     fig = px.line(
                         df,
@@ -656,11 +585,10 @@ def main_dashboard():
                     )
                     st.plotly_chart(fig, use_container_width=True)
             else:
-                st.info("ℹ️ No telemetry data available yet")
+                st.info("No telemetry data available yet")
         else:
-            st.error("❌ Failed to fetch telemetry data")
+            st.error("Failed to fetch telemetry data")
 
-    # ====== TAB 5: Settings ======
     with tabs[4]:
         st.subheader("System Settings")
 
@@ -673,7 +601,7 @@ def main_dashboard():
             memory_threshold = st.slider("Memory Threshold (%)", 1, 100, 85, key="mem_slider")
             disk_threshold = st.slider("Disk Threshold (%)", 1, 100, 90, key="disk_slider")
 
-            if st.button("💾 Update Thresholds", use_container_width=True):
+            if st.button("Update Thresholds", use_container_width=True):
                 result = make_api_call(
                     "/api/analytics/health/thresholds",
                     method="POST",
@@ -684,40 +612,40 @@ def main_dashboard():
                     }
                 )
                 if result and result.get("status") == "success":
-                    st.success("✅ Thresholds updated successfully")
+                    st.success("Thresholds updated successfully")
                 else:
-                    st.error("❌ Failed to update thresholds")
+                    st.error("Failed to update thresholds")
 
         with col2:
             st.markdown("#### Database Management")
 
-            if st.button("🗑️ Clear Old Data (7+ days)", use_container_width=True):
-                st.warning("⚠️ This will delete data older than 7 days")
-                if st.button("✅ Confirm Delete", use_container_width=True, key="confirm_delete"):
+            if st.button("Clear Old Data (7+ days)", use_container_width=True):
+                st.warning("This will delete data older than 7 days")
+                if st.button("Confirm Delete", use_container_width=True, key="confirm_delete"):
                     result = make_api_call(
                         "/api/analytics/telemetry/clear?days=7",
                         method="DELETE"
                     )
                     if result:
                         deleted = result.get('deleted_entries', 0)
-                        st.success(f"✅ Deleted {deleted} entries")
+                        st.success(f"Deleted {deleted} entries")
                     else:
-                        st.error("❌ Failed to clear data")
+                        st.error("Failed to clear data")
 
             st.markdown("#### Export Data")
-            if st.button("📥 Export Telemetry CSV", use_container_width=True):
+            if st.button("Export Telemetry CSV", use_container_width=True):
                 telemetry_data = make_api_call("/api/analytics/telemetry?limit=10000")
                 if telemetry_data and telemetry_data.get("entries"):
                     df = pd.DataFrame(telemetry_data["entries"])
                     csv = df.to_csv(index=False)
                     st.download_button(
-                        label="📥 Download CSV",
+                        label="Download CSV",
                         data=csv,
                         file_name=f"telemetry_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv"
                     )
                 else:
-                    st.error("❌ No data to export")
+                    st.error("No data to export")
 
         st.divider()
 
@@ -731,9 +659,9 @@ def main_dashboard():
             Deterministic ultra-low-latency BLE→CAN real-time gateway
             for safety-critical automotive systems.
             
-            ✅ 26/26 Tests Passing
-            ✅ 58% Code Coverage
-            ✅ Production Ready
+            26/26 Tests Passing
+            70%+ Code Coverage
+            Production Ready
             
             [🔗 GitHub Repository](https://github.com/dhakarshailendra829/AegisCAN-RT)
             """)
@@ -741,17 +669,12 @@ def main_dashboard():
         with info_col2:
             health = make_api_call("/health")
             if health:
-                status_badge = "✅ Healthy" if health.get("status") == "healthy" else "❌ Unhealthy"
+                status_badge = "Healthy" if health.get("status") == "healthy" else "Unhealthy"
                 st.metric("API Status", status_badge)
                 st.metric("Environment", health.get("environment", "unknown").upper())
                 st.metric("Version", health.get("version", "4.0.0"))
             else:
-                st.error("❌ Cannot connect to API server")
-
-
-# ============================================================================
-# Main Application Entry Point
-# ============================================================================
+                st.error("Cannot connect to API server")
 
 if __name__ == "__main__":
     if not st.session_state.authenticated:
