@@ -46,7 +46,7 @@ def delete_old_records(days: int = 30) -> int:
             deleted = cursor.rowcount
             conn.commit()
 
-        logger.info(f"✅ Deleted {deleted} records")
+        logger.info(f"Deleted {deleted} records")
         return deleted
 
     except Exception as e:
@@ -69,7 +69,7 @@ def vacuum_database() -> bool:
         with sqlite3.connect(db_path) as conn:
             conn.execute("VACUUM")
 
-        logger.info("✅ Database vacuumed")
+        logger.info("Database vacuumed")
         return True
 
     except Exception as e:
@@ -90,15 +90,12 @@ def get_database_stats() -> dict:
         with sqlite3.connect(db_path) as conn:
             cursor = conn.cursor()
 
-            # Record count
             cursor.execute("SELECT COUNT(*) FROM telemetry")
             record_count = cursor.fetchone()[0]
 
-            # Date range
             cursor.execute("SELECT MIN(timestamp), MAX(timestamp) FROM telemetry")
             min_date, max_date = cursor.fetchone()
 
-            # Database file size
             db_file = Path(db_path)
             file_size = db_file.stat().st_size if db_file.exists() else 0
 
@@ -145,20 +142,17 @@ def main():
     # Show stats
     if args.stats:
         stats = get_database_stats()
-        logger.info("\n📊 Database Statistics:")
+        logger.info("\nDatabase Statistics:")
         logger.info(f"  Records: {stats.get('record_count', 0)}")
         logger.info(f"  Oldest: {stats.get('oldest_record', 'N/A')}")
         logger.info(f"  Newest: {stats.get('newest_record', 'N/A')}")
         logger.info(f"  Size: {stats.get('database_size_mb', 0):.2f} MB\n")
 
-    # Delete old records
     deleted = delete_old_records(days=args.days)
 
-    # Vacuum if requested
     if args.vacuum:
         vacuum_database()
 
-    # Final stats
     logger.info("=" * 60)
     logger.info("Maintenance Complete")
     logger.info("=" * 60)
