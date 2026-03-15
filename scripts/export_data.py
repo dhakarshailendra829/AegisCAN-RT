@@ -53,7 +53,7 @@ def export_telemetry_csv(output_path: str, days: int = 30) -> bool:
 
         df.to_csv(output_path, index=False)
 
-        logger.info(f"✅ Exported to {output_path}")
+        logger.info(f"Exported to {output_path}")
         return True
 
     except Exception as e:
@@ -88,7 +88,6 @@ def export_telemetry_json(output_path: str, days: int = 30) -> bool:
 
         logger.info(f"Exporting {len(df)} records")
 
-        # Convert to JSON-serializable format
         data = {
             "export_timestamp": datetime.now().isoformat(),
             "record_count": len(df),
@@ -98,7 +97,7 @@ def export_telemetry_json(output_path: str, days: int = 30) -> bool:
         with open(output_path, "w") as f:
             json.dump(data, f, indent=2, default=str)
 
-        logger.info(f"✅ Exported to {output_path}")
+        logger.info(f"Exported to {output_path}")
         return True
 
     except Exception as e:
@@ -131,7 +130,6 @@ def main():
 
     args = parser.parse_args()
 
-    # Generate output path if not provided
     if not args.output:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         args.output = f"telemetry_export_{timestamp}.{args.format}"
@@ -140,7 +138,6 @@ def main():
     logger.info("AegisCAN-RT Data Export")
     logger.info("=" * 60)
 
-    # Export data
     if args.format == "csv":
         success = export_telemetry_csv(args.output, days=args.days)
     else:
