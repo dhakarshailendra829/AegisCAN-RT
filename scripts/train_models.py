@@ -14,7 +14,6 @@ import pandas as pd
 import numpy as np
 import sqlite3
 
-# Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from analytics.anomaly_detector import AnomalyDetector
@@ -73,11 +72,11 @@ def train_anomaly_detector(df: pd.DataFrame, contamination: float = 0.05) -> boo
         success = detector.train(df)
 
         if success:
-            logger.info("✅ Anomaly detector trained successfully")
+            logger.info("Anomaly detector trained successfully")
             status = detector.health_status()
             logger.info(f"Model path: {status['model_path']}")
         else:
-            logger.warning("❌ Anomaly detector training failed")
+            logger.warning("Anomaly detector training failed")
 
         return success
 
@@ -105,11 +104,9 @@ def train_attack_classifier(df: pd.DataFrame) -> bool:
             logger.warning("No attack labels in data - skipping classifier training")
             return False
 
-        # Preprocess and extract features
         processed = preprocess_telemetry(df)
         X = extract_features(processed)
 
-        # Create labels
         label_map = {
             "NORMAL": 0,
             "DOS": 1,
@@ -124,16 +121,15 @@ def train_attack_classifier(df: pd.DataFrame) -> bool:
             logger.warning(f"Insufficient labeled samples: {len(X)}")
             return False
 
-        # Train classifier
         classifier = CyberAttackClassifier()
         success = classifier.train(X, y)
 
         if success:
-            logger.info("✅ Attack classifier trained successfully")
+            logger.info("Attack classifier trained successfully")
             status = classifier.health_status()
             logger.info(f"Model path: {status['model_path']}")
         else:
-            logger.warning("❌ Classifier training failed")
+            logger.warning("Classifier training failed")
 
         return success
 
@@ -166,18 +162,14 @@ def main():
     logger.info("AegisCAN-RT Model Training")
     logger.info("=" * 60)
 
-    # Load data
     df = load_telemetry_data(limit=args.limit)
 
     if df.empty:
-        logger.error("❌ No training data available")
+        logger.error("No training data available")
         return 1
 
-    # Train models
     detector_success = train_anomaly_detector(df, contamination=args.contamination)
     classifier_success = train_attack_classifier(df)
-
-    # Summary
     logger.info("=" * 60)
     logger.info("Training Summary:")
     logger.info(f"  Anomaly Detector: {'✅' if detector_success else '❌'}")
