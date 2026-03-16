@@ -16,7 +16,6 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class FeatureVector:
     latency_ms: float
