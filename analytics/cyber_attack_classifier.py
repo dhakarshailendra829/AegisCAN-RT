@@ -9,7 +9,6 @@ from typing import Optional
 from pathlib import Path
 from dataclasses import dataclass
 from datetime import datetime
-
 import numpy as np
 import pandas as pd
 
@@ -27,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 MODEL_PATH = Path("analytics/models/classifier_model.joblib")
 
-# Attack type mapping
 ATTACK_TYPES = {
     0: "NORMAL",
     1: "DOS",
@@ -40,7 +38,6 @@ ATTACK_TYPES = {
 
 @dataclass
 class AttackPrediction:
-    """Attack classification prediction."""
     timestamp: datetime
     attack_type: str
     confidence: float
@@ -48,14 +45,7 @@ class AttackPrediction:
 
 
 class CyberAttackClassifier:
-    """
-    ML-based cyber attack classifier using Random Forest.
-
-    Classifies attacks by type: DoS, bit-flip, heartbeat loss, etc.
-    """
-
     def __init__(self):
-        """Initialize classifier."""
         self.model = None
         self._logger = logging.getLogger(__name__)
         self._trained = False
@@ -67,7 +57,6 @@ class CyberAttackClassifier:
         self._load_model()
 
     def _load_model(self) -> None:
-        """Load pre-trained model or create new."""
         try:
             if MODEL_PATH.exists():
                 self.model = joblib.load(MODEL_PATH)
@@ -87,16 +76,6 @@ class CyberAttackClassifier:
             self.model = None
 
     def train(self, X: np.ndarray, y: np.ndarray) -> bool:
-        """
-        Train classifier on labeled data.
-
-        Args:
-            X: Feature matrix
-            y: Labels
-
-        Returns:
-            bool: Training success
-        """
         if self.model is None or not RandomForestClassifier:
             self._logger.warning("Model unavailable")
             return False
@@ -109,7 +88,6 @@ class CyberAttackClassifier:
             self.model.fit(X, y)
             self._trained = True
 
-            # Save model
             MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
             joblib.dump(self.model, MODEL_PATH)
 
@@ -123,15 +101,6 @@ class CyberAttackClassifier:
             return False
 
     async def classify(self, features: np.ndarray) -> Optional[AttackPrediction]:
-        """
-        Classify features as attack or normal.
-
-        Args:
-            features: Feature vector
-
-        Returns:
-            AttackPrediction or None
-        """
         if self.model is None or not RandomForestClassifier:
             return None
 
@@ -139,19 +108,15 @@ class CyberAttackClassifier:
             if len(features) == 0:
                 return None
 
-            # Ensure correct shape
             if features.ndim == 1:
                 features = features.reshape(1, -1)
 
-            # Predict
             pred = self.model.predict(features)[0]
             probs = self.model.predict_proba(features)[0]
             confidence = probs.max()
 
-            # Get attack type
             attack_type = ATTACK_TYPES.get(pred, "UNKNOWN")
 
-            # Create prediction object
             prediction = AttackPrediction(
                 timestamp=datetime.now(),
                 attack_type=attack_type,
@@ -162,7 +127,6 @@ class CyberAttackClassifier:
                 }
             )
 
-            # Alert if high confidence attack
             if confidence > 0.7 and attack_type != "NORMAL":
                 await event_bus.publish(
                     EventTopic.ATTACK_EVENT.value,
@@ -185,7 +149,6 @@ class CyberAttackClassifier:
             return None
 
     def health_status(self) -> dict:
-        """Get classifier health status."""
         return {
             "available": self.model is not None,
             "trained": self._trained,
