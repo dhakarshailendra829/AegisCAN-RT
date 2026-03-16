@@ -3,7 +3,6 @@ Time series latency prediction and trend analysis.
 
 Predicts latency trends and detects degradation.
 """
-
 import logging
 from typing import Optional
 from collections import deque
@@ -13,7 +12,6 @@ import numpy as np
 from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
-
 @dataclass
 class LatencyTrend:
     timestamp: datetime
