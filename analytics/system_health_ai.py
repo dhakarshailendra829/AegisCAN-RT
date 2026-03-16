@@ -8,15 +8,12 @@ import logging
 from typing import Optional
 from dataclasses import dataclass
 from datetime import datetime
-
 from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class HealthAlert:
-    """System health alert."""
     timestamp: datetime
     alert_type: str
     severity: str
@@ -26,37 +23,20 @@ class HealthAlert:
 
 
 class SystemHealthMonitor:
-    """
-    Monitors system health and generates adaptive alerts.
-
-    Tracks CPU, memory, and disk usage with intelligent thresholding.
-    """
-
     def __init__(self):
-        """Initialize health monitor."""
         self._logger = logging.getLogger(__name__)
-
-        # Adaptive thresholds
         self.cpu_threshold = 80
         self.memory_threshold = 85
         self.disk_threshold = 90
 
-        # Alert history for debouncing
         self._alert_history = {}
 
     async def on_metrics_event(self, data: dict) -> None:
-        """
-        Process system metrics event.
-
-        Args:
-            data: Metrics data
-        """
         try:
             cpu = data.get("cpu_percent")
             memory = data.get("memory_percent")
             disk = data.get("disk_percent")
 
-            # Check each resource
             if cpu is not None:
                 await self._check_resource("cpu", cpu, self.cpu_threshold)
 
@@ -75,24 +55,13 @@ class SystemHealthMonitor:
         value: float,
         threshold: float
     ) -> None:
-        """
-        Check resource usage and alert if needed.
-
-        Args:
-            resource: Resource name (cpu, memory, disk)
-            value: Current value
-            threshold: Alert threshold
-        """
         if value > threshold:
-            # Determine severity
             if value > threshold * 1.5:
                 severity = "CRITICAL"
             elif value > threshold * 1.2:
                 severity = "HIGH"
             else:
                 severity = "MEDIUM"
-
-            # Debounce: only alert once per resource every 60 seconds
             alert_key = f"{resource}_{severity}"
             last_alert = self._alert_history.get(alert_key)
 
@@ -130,14 +99,6 @@ class SystemHealthMonitor:
         memory: Optional[float] = None,
         disk: Optional[float] = None
     ) -> None:
-        """
-        Update alert thresholds dynamically.
-
-        Args:
-            cpu: CPU threshold (0-100)
-            memory: Memory threshold (0-100)
-            disk: Disk threshold (0-100)
-        """
         if cpu is not None:
             self.cpu_threshold = max(1, min(99, cpu))
 
@@ -153,7 +114,6 @@ class SystemHealthMonitor:
         )
 
     def health_status(self) -> dict:
-        """Get monitor health status."""
         return {
             "thresholds": {
                 "cpu": self.cpu_threshold,
