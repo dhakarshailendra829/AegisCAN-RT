@@ -3,7 +3,6 @@ ML-based anomaly detection for telemetry data.
 
 Uses Isolation Forest for unsupervised anomaly detection.
 """
-
 import logging
 from typing import Tuple, Optional
 from pathlib import Path
@@ -27,32 +26,17 @@ logger = logging.getLogger(__name__)
 
 MODEL_PATH = Path("analytics/models/anomaly_model.joblib")
 
-
 @dataclass
 class AnomalyEvent:
-    """Anomaly detection event."""
     timestamp: datetime
     anomaly_ratio: float
     anomaly_count: int
     total_samples: int
-    severity: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
+    severity: str  
     scores: list
 
-
 class AnomalyDetector:
-    """
-    ML-based anomaly detection using Isolation Forest.
-
-    Detects statistical anomalies in telemetry data.
-    """
-
     def __init__(self, contamination: float = 0.05):
-        """
-        Initialize anomaly detector.
-
-        Args:
-            contamination: Expected anomaly ratio (0-1)
-        """
         self.model = None
         self.contamination = contamination
         self._logger = logging.getLogger(__name__)
@@ -65,7 +49,6 @@ class AnomalyDetector:
         self._load_or_train()
 
     def _load_or_train(self) -> None:
-        """Load existing model or create new one."""
         if not IsolationForest:
             return
 
@@ -88,15 +71,6 @@ class AnomalyDetector:
             self.model = None
 
     def train(self, df: pd.DataFrame) -> bool:
-        """
-        Train detector on telemetry data.
-
-        Args:
-            df: Training DataFrame
-
-        Returns:
-            bool: Training success
-        """
         if self.model is None or not IsolationForest:
             self._logger.warning("Model unavailable")
             return False
@@ -105,20 +79,14 @@ class AnomalyDetector:
             if df.empty:
                 self._logger.warning("Cannot train on empty DataFrame")
                 return False
-
-            # Preprocess and extract features
             processed = preprocess_telemetry(df)
             X = extract_features(processed)
 
             if len(X) < 10:
                 self._logger.warning(f"Insufficient training samples: {len(X)}")
                 return False
-
-            # Train model
             self.model.fit(X)
             self._trained = True
-
-            # Save model
             MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
             joblib.dump(self.model, MODEL_PATH)
 
@@ -136,39 +104,23 @@ class AnomalyDetector:
         df: pd.DataFrame,
         threshold: float = 0.1
     ) -> Tuple[np.ndarray, AnomalyEvent]:
-        """
-        Detect anomalies in telemetry.
-
-        Args:
-            df: Telemetry DataFrame
-            threshold: Anomaly ratio threshold for alert
-
-        Returns:
-            tuple: (predictions, AnomalyEvent)
-        """
         if self.model is None or not IsolationForest:
             return np.array([]), None
 
         try:
             if df.empty:
                 return np.array([]), None
-
-            # Preprocess and extract features
             processed = preprocess_telemetry(df)
             X = extract_features(processed)
 
             if len(X) == 0:
                 return np.array([]), None
-
-            # Predict anomalies
-            predictions = self.model.predict(X)  # -1 = anomaly, 1 = normal
+            predictions = self.model.predict(X)  
             scores = self.model.score_samples(X)
 
-            # Calculate metrics
             anomaly_count = (predictions == -1).sum()
             anomaly_ratio = anomaly_count / len(predictions)
 
-            # Determine severity
             if anomaly_ratio > 0.5:
                 severity = "CRITICAL"
             elif anomaly_ratio > 0.3:
@@ -178,7 +130,6 @@ class AnomalyDetector:
             else:
                 severity = "LOW"
 
-            # Create event
             event = AnomalyEvent(
                 timestamp=datetime.now(),
                 anomaly_ratio=anomaly_ratio,
@@ -188,7 +139,6 @@ class AnomalyDetector:
                 scores=scores.tolist()
             )
 
-            # Publish if above threshold
             if anomaly_ratio > threshold:
                 await event_bus.publish(
                     EventTopic.ATTACK_EVENT.value,
