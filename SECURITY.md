@@ -10,7 +10,8 @@ We actively maintain and provide security updates only for the latest stable rel
 
 | Version      | Supported |
 |--------------|-----------|
-| Latest (master branch) v3.0.2 | Yes |
+|Latest realeases v4.0.0 | Yes 
+| Previous realeases v3.0.2 | Yes |
 | Previous minor release | Limited |
 | Older releases v3.0.1 | No |
 
@@ -97,4 +98,4 @@ Security vulnerabilities should never be disclosed publicly until reviewed and r
 
 ---
 
-Thank you for helping keep CropVanta.AI secure.
+Thank you for helping keep AegisCAN-RT secure.
