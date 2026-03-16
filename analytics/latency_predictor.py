@@ -9,56 +9,32 @@ from typing import Optional
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
-
 import numpy as np
-
 from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class LatencyTrend:
-    """Latency trend information."""
     timestamp: datetime
     slope: float
-    trend_direction: str  # "improving", "stable", "degrading"
+    trend_direction: str  
     confidence: float
     prediction: Optional[float] = None
 
-
 class LatencyPredictor:
-    """
-    Analyzes latency trends and predicts degradation.
-
-    Uses polynomial regression for trend analysis.
-    """
-
     def __init__(self, window_size: int = 100):
-        """
-        Initialize latency predictor.
-
-        Args:
-            window_size: Historical window size
-        """
         self.latencies = deque(maxlen=window_size)
         self._logger = logging.getLogger(__name__)
-        self._threshold_slope = 50.0  # µs per sample
+        self._threshold_slope = 50.0  
         self._min_samples = 20
 
     async def on_can_tx_event(self, data: dict) -> None:
-        """
-        Process CAN TX event for latency tracking.
-
-        Args:
-            data: Event data
-        """
         try:
             latency = data.get("latency_us")
             if latency is not None:
                 self.latencies.append(latency)
 
-                # Check for trend every min_samples
                 if len(self.latencies) >= self._min_samples:
                     trend = await self.analyze_trend()
                     if trend:
@@ -68,23 +44,14 @@ class LatencyPredictor:
             self._logger.error(f"Error processing CAN TX event: {e}")
 
     async def analyze_trend(self) -> Optional[LatencyTrend]:
-        """
-        Analyze latency trend using polynomial regression.
-
-        Returns:
-            LatencyTrend or None
-        """
         try:
             if len(self.latencies) < self._min_samples:
                 return None
 
             arr = np.array(list(self.latencies))
-
-            # Fit polynomial
             z = np.polyfit(range(len(arr)), arr, 1)
             slope = z[0]
 
-            # Determine trend
             if slope > 10:
                 trend_direction = "degrading"
                 confidence = min(abs(slope) / 100, 1.0)
@@ -95,7 +62,6 @@ class LatencyPredictor:
                 trend_direction = "stable"
                 confidence = 1.0 - min(abs(slope) / 100, 1.0)
 
-            # Predict next value
             prediction = float(np.polyval(z, len(arr)))
 
             trend = LatencyTrend(
@@ -118,12 +84,6 @@ class LatencyPredictor:
             return None
 
     async def _check_degradation(self, trend: LatencyTrend) -> None:
-        """
-        Check for latency degradation and alert.
-
-        Args:
-            trend: LatencyTrend object
-        """
         if trend.slope > self._threshold_slope and trend.confidence > 0.7:
             self._logger.warning(
                 f"Latency degradation detected: slope={trend.slope:.2f}µs/sample"
@@ -142,7 +102,6 @@ class LatencyPredictor:
             )
 
     def get_statistics(self) -> dict:
-        """Get latency statistics."""
         if not self.latencies:
             return {}
 
@@ -159,7 +118,6 @@ class LatencyPredictor:
         }
 
     def health_status(self) -> dict:
-        """Get predictor health status."""
         return {
             "samples": len(self.latencies),
             "max_window": self.latencies.maxlen,
