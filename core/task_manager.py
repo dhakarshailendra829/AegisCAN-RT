@@ -17,10 +17,8 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-
 @dataclass
 class TaskInfo:
-    """Information about a managed task."""
     name: str
     task: asyncio.Task
     created_at: datetime
@@ -28,11 +26,9 @@ class TaskInfo:
     error: Optional[Exception] = None
 
     def is_running(self) -> bool:
-        """Check if task is still running."""
         return not self.task.done()
 
     def get_exception(self) -> Optional[Exception]:
-        """Get task exception if any."""
         if self.task.done():
             try:
                 self.task.result()
@@ -42,18 +38,7 @@ class TaskInfo:
                 return e
         return None
 
-
 class TaskManager:
-    """
-    Manages async task lifecycle with tracking and safety.
-
-    Features:
-    - Track tasks by name
-    - Prevent duplicate tasks
-    - Graceful cancellation
-    - Health monitoring
-    """
-
     def __init__(self):
         self._tasks: Dict[str, TaskInfo] = {}
         self._logger = logging.getLogger(__name__)
@@ -65,33 +50,16 @@ class TaskManager:
         *args,
         **kwargs
     ) -> asyncio.Task:
-        """
-        Start a named async task.
-
-        Args:
-            name: Unique task name
-            coro: Coroutine function
-            args: Positional arguments
-            kwargs: Keyword arguments
-
-        Returns:
-            asyncio.Task: The created task
-
-        Raises:
-            RuntimeError: If task with same name already running
-        """
         if name in self._tasks:
             task_info = self._tasks[name]
             if task_info.is_running():
                 self._logger.warning(f"Task '{name}' already running – skipping start")
                 return task_info.task
 
-        # Create task
         task = asyncio.create_task(coro(*args, **kwargs), name=name)
         task_info = TaskInfo(name=name, task=task, created_at=datetime.now())
         self._tasks[name] = task_info
 
-        # Add callback to clean up on completion
         def _task_done_callback(t: asyncio.Task) -> None:
             task_info.error = task_info.get_exception()
             if task_info.error and not isinstance(task_info.error, asyncio.CancelledError):
@@ -104,16 +72,6 @@ class TaskManager:
         return task
 
     def cancel_task(self, name: str, timeout: float = 5.0) -> bool:
-        """
-        Cancel a task gracefully.
-
-        Args:
-            name: Task name
-            timeout: Timeout for cancellation
-
-        Returns:
-            bool: True if task was cancelled
-        """
         task_info = self._tasks.get(name)
         if not task_info or task_info.task.done():
             return False
@@ -124,16 +82,6 @@ class TaskManager:
         return True
 
     async def cancel_task_async(self, name: str, timeout: float = 5.0) -> bool:
-        """
-        Asynchronously cancel a task with timeout.
-
-        Args:
-            name: Task name
-            timeout: Timeout for cancellation
-
-        Returns:
-            bool: True if task was cancelled
-        """
         task_info = self._tasks.get(name)
         if not task_info or task_info.task.done():
             return False
@@ -150,20 +98,16 @@ class TaskManager:
         return True
 
     def get_task(self, name: str) -> Optional[asyncio.Task]:
-        """Get task by name."""
         task_info = self._tasks.get(name)
         return task_info.task if task_info else None
 
     def get_task_info(self, name: str) -> Optional[TaskInfo]:
-        """Get task information."""
         return self._tasks.get(name)
 
     def list_tasks(self) -> List[str]:
-        """Get all task names."""
         return [name for name, info in self._tasks.items() if info.is_running()]
 
     def health_status(self) -> Dict[str, Any]:
-        """Get task manager health status."""
         running = sum(1 for info in self._tasks.values() if info.is_running())
         failed = sum(1 for info in self._tasks.values() if info.error is not None)
 
@@ -183,15 +127,6 @@ class TaskManager:
         }
 
     async def shutdown_all(self, timeout: float = 30.0) -> Dict[str, bool]:
-        """
-        Gracefully shutdown all tasks.
-
-        Args:
-            timeout: Timeout for shutdown
-
-        Returns:
-            dict: Shutdown status for each task
-        """
         self._logger.info(f"Shutting down {len(self._tasks)} tasks")
 
         results = {}
@@ -199,11 +134,9 @@ class TaskManager:
             (name, info) for name, info in self._tasks.items() if info.is_running()
         ]
 
-        # Cancel all tasks
         for name, info in tasks_to_cancel:
             info.task.cancel()
 
-        # Wait for all tasks to complete
         if tasks_to_cancel:
             try:
                 await asyncio.wait_for(
@@ -216,13 +149,10 @@ class TaskManager:
             except asyncio.TimeoutError:
                 self._logger.warning(f"Task shutdown timeout after {timeout}s")
 
-        # Collect results
         for name, info in self._tasks.items():
             results[name] = info.task.done()
 
         self._logger.info("All tasks shutdown complete")
         return results
 
-
-# Global task manager instance
 task_manager = TaskManager()
