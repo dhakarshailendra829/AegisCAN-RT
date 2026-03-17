@@ -13,10 +13,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Optional
 from urllib.parse import urlparse
 
-
 class Settings(BaseSettings):
-    """Application settings from environment variables."""
-
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -31,7 +28,6 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     DATABASE_URL: str = "sqlite+aiosqlite:///./data/aegiscan.db"
-    
     DATABASE_POOL_SIZE: int = 10
     DATABASE_MAX_OVERFLOW: int = 20
     DATABASE_POOL_RECYCLE: int = 3600
@@ -54,27 +50,22 @@ class Settings(BaseSettings):
 
     @property
     def is_sqlite(self) -> bool:
-        """Check if using SQLite database."""
         return "sqlite" in self.DATABASE_URL.lower()
 
     @property
     def is_postgresql(self) -> bool:
-        """Check if using PostgreSQL database."""
         return "postgresql" in self.DATABASE_URL.lower()
 
     @property
     def is_mysql(self) -> bool:
-        """Check if using MySQL database."""
         return "mysql" in self.DATABASE_URL.lower()
 
     @property
     def is_production(self) -> bool:
-        """Check if running in production mode."""
         return self.ENVIRONMENT.lower() == "production"
 
     @property
     def is_development(self) -> bool:
-        """Check if running in development mode."""
         return self.ENVIRONMENT.lower() == "development"
 
 settings = Settings()
