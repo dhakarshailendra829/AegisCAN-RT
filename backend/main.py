@@ -1,10 +1,9 @@
+import numpy as np
 import logging
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-
 from backend.config import settings
 from backend.routers import gateway, analytics, external
 from backend.dependencies import engine
@@ -20,9 +19,7 @@ _gateway_instance: Gateway = None
 async def lifespan(app: FastAPI):
     try:
         logger.info("Starting AegisCAN-RT Application")
-
         from sqlalchemy import text
-
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
             logger.info("Database connection successful")
@@ -117,12 +114,6 @@ app.include_router(
 
 @app.get("/health", tags=["Health"])
 async def health_check():
-    """
-    Basic health check endpoint.
-
-    Returns:
-        dict: Health status
-    """
     return {
         "status": "healthy",
         "environment": settings.ENVIRONMENT,
@@ -133,12 +124,6 @@ async def health_check():
 
 @app.get("/status", tags=["Health"])
 async def status_check():
-    """
-    Detailed status check endpoint.
-
-    Returns:
-        dict: System status information
-    """
     return {
         "status": "running",
         "environment": settings.ENVIRONMENT,
@@ -155,7 +140,6 @@ async def status_check():
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    """Global exception handler for unhandled errors."""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
     return {
         "status": "error",
@@ -164,14 +148,7 @@ async def global_exception_handler(request, exc):
     }
 
 def create_app():
-    """
-    Application factory function.
-
-    Returns:
-        FastAPI: Configured FastAPI application
-    """
     return app
-
 
 if __name__ == "__main__":
     logger.info(f"Starting uvicorn on {settings.API_HOST}:{settings.API_PORT}")
