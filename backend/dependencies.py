@@ -1,17 +1,14 @@
 import logging
 from typing import AsyncGenerator
-
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
 from sqlalchemy.pool import NullPool, QueuePool
-
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
-
 
 def _get_engine_kwargs() -> dict:
     base_kwargs = {
