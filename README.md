@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">🛡️ AegisCAN-RT v3.0.3</h1>
+  <h1 align="center">🛡️ AegisCAN-RT v4.0.0</h1>
   <h3 align="center">Deterministic Ultra-Latency BLE → CAN Automotive Gateway & Cybersecurity Research Platform  </h3>
 </p>
 
@@ -204,8 +204,11 @@ streamlit run frontend/streamlit_app.py
 
 ## Version History
 
-### Latest Version v3.0.3
+### Latest Version v4.0.0
 - Fully integrated and advanced backend development system
+  
+### v3.0.3
+- old version
   
 ### v3.0.2
 - Performance optimizations  
