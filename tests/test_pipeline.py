@@ -1,21 +1,16 @@
 """
 Tests for data pipeline and steering angle conversion.
-
 Tests CAN translator scaling and range validation.
 """
 
 import pytest
 from src.can_translator import CANTranslator
 
-
 @pytest.fixture
 def translator():
-    """Provide CAN translator instance."""
     return CANTranslator()
 
-
 def test_scale_steering(translator):
-    """Test steering angle scaling from raw (0-255) to degrees (±900)."""
     result = translator._scale_steering(127)
     assert -50 <= result <= 50, f"Center should be near 0, got {result}"
     
@@ -25,9 +20,7 @@ def test_scale_steering(translator):
     result = translator._scale_steering(0)
     assert -1000 <= result <= -400, f"Min should be near -900, got {result}"
 
-
 def test_scale_range(translator):
-    """Test steering angle range constraints."""
     result_0 = translator._scale_steering(0)
     assert result_0 < 0, f"Value 0 should be negative, got {result_0}"
     
