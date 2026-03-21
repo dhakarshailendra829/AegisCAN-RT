@@ -18,11 +18,9 @@ import logging
 from typing import Optional
 from dataclasses import dataclass
 from enum import Enum
-
 from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
-
 
 class AttackType(str, Enum):
     """Attack simulation types."""
@@ -30,14 +28,12 @@ class AttackType(str, Enum):
     BIT_FLIP = "BIT_FLIP"
     HEARTBEAT_LOSS = "HEARTBEAT_LOSS"
 
-
 class SeverityLevel(str, Enum):
     """Attack severity levels."""
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
-
 
 @dataclass
 class AttackEvent:
@@ -50,17 +46,7 @@ class AttackEvent:
     rate_hz: Optional[float] = None
     event_count: int = 0
 
-
 class AttackEngine:
-    """
-    Simulates cyber attacks for testing detection systems.
-
-    Supported attacks:
-    - DoS: High-rate message flooding
-    - Bit-flip: Data corruption attacks
-    - Heartbeat-loss: Loss of heartbeat/keep-alive messages
-    """
-
     def __init__(self):
         """Initialize attack engine."""
         self._logger = logging.getLogger(__name__)
@@ -72,15 +58,6 @@ class AttackEngine:
         duration_sec: float = 3.0,
         rate_hz: float = 80.0
     ) -> None:
-        """
-        Simulate Denial of Service attack.
-
-        Floods the network with high-rate messages to test robustness.
-
-        Args:
-            duration_sec: Attack duration in seconds
-            rate_hz: Message rate in Hz
-        """
         self._logger.warning(
             f"Starting DoS attack: {duration_sec}s @ {rate_hz} Hz"
         )
@@ -119,11 +96,6 @@ class AttackEngine:
             raise
 
     async def bit_flip(self) -> None:
-        """
-        Simulate bit-flip attack.
-
-        Injects random bit flips into steering data to test data integrity checks.
-        """
         self._logger.warning("Executing bit-flip attack")
 
         try:
@@ -145,14 +117,6 @@ class AttackEngine:
             raise
 
     async def heartbeat_drop(self, duration_sec: float = 5.0) -> None:
-        """
-        Simulate heartbeat loss attack.
-
-        Stops sending heartbeat messages to simulate node isolation.
-
-        Args:
-            duration_sec: Duration of heartbeat loss in seconds
-        """
         self._logger.warning(f"Starting heartbeat drop attack ({duration_sec}s)")
 
         end_time = asyncio.get_running_loop().time() + duration_sec
@@ -188,7 +152,6 @@ class AttackEngine:
             raise
 
     def health_status(self) -> dict:
-        """Get attack engine health status."""
         return {
             "current_attack": None if not self._current_attack or self._current_attack.done() else "active",
             "total_attacks": self._attack_count
