@@ -18,7 +18,6 @@ from queue import PriorityQueue, Full, Empty
 from typing import Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
-
 from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
@@ -32,10 +31,8 @@ STEERING_MAX = 255
 PACKET_TIMEOUT = 0.1
 SIMULATE_INTERVAL = 0.02  
 
-
 @dataclass
 class PacketInfo:
-    """Information about a BLE packet."""
     priority: int
     timestamp_us: int
     data: bytes
@@ -43,24 +40,7 @@ class PacketInfo:
 
 
 class BLEReceiver:
-    """
-    Receives BLE data and forwards via UDP with priority queue buffering.
-
-    Features:
-    - Priority queue packet management
-    - UDP socket communication
-    - Steering data simulation
-    - Exception handling and recovery
-    - Graceful shutdown
-    """
-
     def __init__(self, max_queue_size: int = 500):
-        """
-        Initialize BLE receiver.
-
-        Args:
-            max_queue_size: Maximum queue size
-        """
         self.queue: PriorityQueue = PriorityQueue(maxsize=max_queue_size)
         self.running = False
         self._udp_task: Optional[asyncio.Task] = None
@@ -75,21 +55,10 @@ class BLEReceiver:
         data: bytes,
         priority: int = 1
     ) -> Tuple[int, int, bytes]:
-        """
-        Create a timestamped packet.
-
-        Args:
-            data: Packet data
-            priority: Packet priority
-
-        Returns:
-            tuple: (priority, timestamp_us, data)
-        """
         ts_us = int(asyncio.get_running_loop().time() * 1_000_000)
         return priority, ts_us, data
 
     async def _udp_forward_loop(self) -> None:
-        """Forward queued packets via UDP."""
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         try:
@@ -148,7 +117,6 @@ class BLEReceiver:
             )
 
     async def simulate(self) -> None:
-        """Simulate steering data input."""
         self._logger.info("BLE simulation starting")
 
         while self.running:
@@ -189,7 +157,6 @@ class BLEReceiver:
         self._logger.info("BLE simulation stopped")
 
     async def start(self) -> None:
-        """Start BLE receiver and simulator."""
         if self.running:
             self._logger.warning("BLEReceiver already running")
             return
@@ -203,7 +170,6 @@ class BLEReceiver:
         self._logger.info("BLEReceiver started successfully")
 
     async def stop(self) -> None:
-        """Stop BLE receiver and simulator gracefully."""
         if not self.running:
             return
 
@@ -221,7 +187,6 @@ class BLEReceiver:
         self._logger.info(f"BLEReceiver stopped (packets={self._packet_count})")
 
     def health_status(self) -> dict:
-        """Get receiver health status."""
         return {
             "running": self.running,
             "queue_size": self.queue.qsize(),
