@@ -23,13 +23,11 @@ from core.event_bus import event_bus, EventTopic
 logger = logging.getLogger(__name__)
 
 class AttackType(str, Enum):
-    """Attack simulation types."""
     DOS = "DOS"
     BIT_FLIP = "BIT_FLIP"
     HEARTBEAT_LOSS = "HEARTBEAT_LOSS"
 
 class SeverityLevel(str, Enum):
-    """Attack severity levels."""
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
@@ -37,7 +35,6 @@ class SeverityLevel(str, Enum):
 
 @dataclass
 class AttackEvent:
-    """Attack simulation event."""
     type: AttackType
     severity: SeverityLevel
     description: str
@@ -48,7 +45,6 @@ class AttackEvent:
 
 class AttackEngine:
     def __init__(self):
-        """Initialize attack engine."""
         self._logger = logging.getLogger(__name__)
         self._current_attack: Optional[asyncio.Task] = None
         self._attack_count = 0
