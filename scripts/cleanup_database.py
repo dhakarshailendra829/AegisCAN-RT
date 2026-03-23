@@ -10,27 +10,14 @@ import logging
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta
-
 import sqlite3
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
 def delete_old_records(days: int = 30) -> int:
-    """
-    Delete telemetry records older than specified days.
-
-    Args:
-        days: Age threshold in days
-
-    Returns:
-        int: Number of deleted records
-    """
     logger.info(f"Deleting records older than {days} days...")
 
     try:
@@ -53,14 +40,7 @@ def delete_old_records(days: int = 30) -> int:
         logger.error(f"Delete failed: {e}", exc_info=True)
         return 0
 
-
 def vacuum_database() -> bool:
-    """
-    Vacuum database to reclaim space.
-
-    Returns:
-        bool: Success status
-    """
     logger.info("Vacuuming database...")
 
     try:
@@ -76,14 +56,7 @@ def vacuum_database() -> bool:
         logger.error(f"Vacuum failed: {e}", exc_info=True)
         return False
 
-
 def get_database_stats() -> dict:
-    """
-    Get database statistics.
-
-    Returns:
-        dict: Database statistics
-    """
     try:
         db_path = str(settings.DATABASE_URL).replace("sqlite+aiosqlite:///", "")
 
@@ -112,7 +85,6 @@ def get_database_stats() -> dict:
 
 
 def main():
-    """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Maintain AegisCAN-RT database"
     )
@@ -139,7 +111,6 @@ def main():
     logger.info("AegisCAN-RT Database Maintenance")
     logger.info("=" * 60)
 
-    # Show stats
     if args.stats:
         stats = get_database_stats()
         logger.info("\nDatabase Statistics:")
@@ -158,7 +129,6 @@ def main():
     logger.info("=" * 60)
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
