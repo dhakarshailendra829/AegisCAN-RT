@@ -17,7 +17,6 @@ import sqlite3
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 from datetime import datetime
-
 from backend.config import settings
 from core.event_bus import event_bus, EventTopic
 from core.task_manager import task_manager
@@ -28,21 +27,8 @@ from src.attack_engine import AttackEngine
 
 logger = logging.getLogger(__name__)
 
-
 class Gateway:
-    """
-    Central gateway coordinating BLE-to-CAN translation.
-
-    Manages:
-    - BLE input
-    - CAN output
-    - Attack simulation
-    - Telemetry collection
-    - System health
-    """
-
     def __init__(self):
-        """Initialize gateway."""
         self.running: bool = False
         self.telemetry: List[Dict[str, Any]] = []
         self.max_telemetry: int = settings.MAX_TELEMETRY_BUFFER
@@ -64,7 +50,6 @@ class Gateway:
         self._ensure_tables()
 
     def _ensure_tables(self) -> None:
-        """Ensure database tables exist."""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -102,22 +87,18 @@ class Gateway:
             raise
 
     def _on_can_tx(self, data: Dict[str, Any]) -> None:
-        """Handle CAN transmission event."""
         data["type"] = "CAN_TX"
         self._append_telemetry(data)
 
     def _on_attack_event(self, data: Dict[str, Any]) -> None:
-        """Handle attack event."""
         data["type"] = "ATTACK"
         self._append_telemetry(data)
 
     def _on_metrics(self, data: Dict[str, Any]) -> None:
-        """Handle system metrics event."""
         data["type"] = "METRICS"
         self._append_telemetry(data)
 
     def _append_telemetry(self, entry: Dict[str, Any]) -> None:
-        """Append telemetry to memory and database."""
         self.telemetry.append(entry)
         if len(self.telemetry) > self.max_telemetry:
             self.telemetry.pop(0)
@@ -166,7 +147,6 @@ class Gateway:
             self._logger.error(f"Database insert failed: {e}", exc_info=True)
 
     async def start(self) -> None:
-        """Start the gateway."""
         if self.running:
             self._logger.info("Gateway already running")
             return
@@ -194,7 +174,6 @@ class Gateway:
             raise
 
     async def stop(self) -> None:
-        """Stop the gateway gracefully."""
         if not self.running:
             return
 
@@ -220,7 +199,6 @@ class Gateway:
             self._logger.error(f"Gateway stop failed: {e}", exc_info=True)
 
     def set_attack_mode(self, mode: Optional[str]) -> None:
-        """Set attack simulation mode."""
         self.can.attack_mode = mode
 
         if mode:
@@ -240,7 +218,6 @@ class Gateway:
             self._logger.info("Attack mode deactivated")
 
     def health_status(self) -> Dict[str, Any]:
-        """Get comprehensive gateway health status."""
         uptime = None
         if self._start_time:
             uptime = (datetime.now() - self._start_time).total_seconds()
