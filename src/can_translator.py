@@ -23,7 +23,6 @@ try:
     import can
 except ImportError:
     can = None
-
 from core.event_bus import event_bus, EventTopic
 
 logger = logging.getLogger(__name__)
@@ -35,10 +34,8 @@ STEERING_SCALE_FACTOR = 900 / 255
 UDP_LISTEN_IP = "127.0.0.1"
 UDP_LISTEN_PORT = 5005
 
-
 @dataclass
 class PacketMetrics:
-    """Metrics for a processed packet."""
     priority: int
     timestamp_us: int
     steering_angle: int
@@ -48,26 +45,7 @@ class PacketMetrics:
 
 
 class CANTranslator:
-    """
-    Translates UDP steering packets to CAN frames.
-
-    Features:
-    - UDP socket listening
-    - Priority queue buffering
-    - CAN frame transmission
-    - Steering angle scaling
-    - Attack simulation
-    - Latency measurement
-    - Graceful error recovery
-    """
-
     def __init__(self, attack_mode: Optional[str] = None):
-        """
-        Initialize CAN translator.
-
-        Args:
-            attack_mode: Initial attack mode (dos, flip, heart, or None)
-        """
         self.queue: PriorityQueue = PriorityQueue(maxsize=500)
         self.running = False
         self.attack_mode = attack_mode
@@ -80,7 +58,6 @@ class CANTranslator:
         self._error_count = 0
 
     def _setup_can_bus(self) -> None:
-        """Setup CAN bus with fallback options."""
         if can is None:
             self._logger.warning("python-can not installed - CAN disabled")
             return
@@ -101,19 +78,9 @@ class CANTranslator:
         raise RuntimeError("Failed to initialize CAN bus on any interface")
 
     def _scale_steering(self, raw: int) -> int:
-        """
-        Scale raw steering value (0-255) to angle (0-900 degrees).
-
-        Args:
-            raw: Raw steering value (0-255)
-
-        Returns:
-            int: Steering angle (-450 to 450 degrees)
-        """
         return int((raw - 127) * STEERING_SCALE_FACTOR)
 
     async def _udp_receiver_loop(self) -> None:
-        """Listen for UDP packets and queue them."""
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind((UDP_LISTEN_IP, UDP_LISTEN_PORT))
@@ -160,7 +127,6 @@ class CANTranslator:
             self._logger.info("UDP receiver loop ended")
 
     def _process_packet(self, item: Tuple[int, int, bytes]) -> None:
-        """Process a single packet and send via CAN."""
         priority, ts_us, ble_data = item
 
         try:
@@ -212,7 +178,6 @@ class CANTranslator:
             self._logger.error(f"CAN packet processing failed: {e}", exc_info=True)
 
     async def _process_loop(self) -> None:
-        """Main packet processing loop."""
         self._logger.info("CAN process loop started")
 
         while self.running:
@@ -237,7 +202,6 @@ class CANTranslator:
         self._logger.info("CAN process loop ended")
 
     async def start(self) -> None:
-        """Start CAN translator."""
         if self.running:
             self._logger.warning("CANTranslator already running")
             return
@@ -257,7 +221,6 @@ class CANTranslator:
         self._logger.info("CANTranslator started successfully")
 
     async def stop(self) -> None:
-        """Stop CAN translator gracefully."""
         if not self.running:
             return
 
@@ -282,7 +245,6 @@ class CANTranslator:
         )
 
     def health_status(self) -> dict:
-        """Get translator health status."""
         return {
             "running": self.running,
             "attack_mode": self.attack_mode,
