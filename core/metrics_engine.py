@@ -27,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class SystemMetrics:
-    """System metrics snapshot."""
     timestamp: float
     cpu_percent: Optional[float]
     memory_percent: Optional[float]
@@ -35,7 +34,6 @@ class SystemMetrics:
     active_tasks: int
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
         return {
             "timestamp": self.timestamp,
             "cpu_percent": self.cpu_percent,
@@ -46,23 +44,7 @@ class SystemMetrics:
 
 
 class MetricsEngine:
-    """
-    Collects and publishes system metrics.
-
-    Features:
-    - Configurable collection interval
-    - System resource monitoring
-    - Event publishing
-    - Graceful error handling
-    """
-
     def __init__(self, interval: float = 5.0):
-        """
-        Initialize metrics engine.
-
-        Args:
-            interval: Collection interval in seconds
-        """
         self.interval = interval
         self._task: Optional[asyncio.Task] = None
         self.running = False
@@ -75,7 +57,6 @@ class MetricsEngine:
             )
 
     async def collect(self) -> None:
-        """Collect metrics in loop."""
         self._logger.info(f"Metrics collection started (interval={self.interval}s)")
 
         while self.running:
@@ -104,7 +85,6 @@ class MetricsEngine:
             await asyncio.sleep(self.interval)
 
     def _gather_metrics(self) -> SystemMetrics:
-        """Gather system metrics."""
         if psutil is None:
             return SystemMetrics(
                 timestamp=time.time(),
@@ -133,7 +113,6 @@ class MetricsEngine:
             )
 
     def start(self) -> None:
-        """Start metrics collection."""
         if self.running:
             self._logger.warning("Metrics engine already running")
             return
@@ -143,7 +122,6 @@ class MetricsEngine:
         self._logger.info("MetricsEngine started")
 
     async def stop(self) -> None:
-        """Stop metrics collection gracefully."""
         if not self.running:
             return
 
@@ -159,11 +137,9 @@ class MetricsEngine:
         self._logger.info("MetricsEngine stopped")
 
     def get_last_metrics(self) -> Optional[SystemMetrics]:
-        """Get last collected metrics."""
         return self._last_metrics
 
     def health_status(self) -> Dict[str, Any]:
-        """Get metrics engine health status."""
         return {
             "running": self.running,
             "interval": self.interval,
